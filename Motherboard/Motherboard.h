@@ -218,19 +218,19 @@ class Motherboard{
     elapsedMicros clockInputs;
 
     // Callbacks
-    using PressDownCallback = void (*)(byte);
+    using PressDownCallback = void (*)(byte inputIndex);
     PressDownCallback *inputsPressDownCallback;
-    using LongPressDownCallback = void (*)(byte);
+    using LongPressDownCallback = void (*)(byte inputIndex);
     LongPressDownCallback *inputsLongPressDownCallback;
-    using PressUpCallback = void (*)(byte);
+    using PressUpCallback = void (*)(byte inputIndex);
     PressUpCallback *inputsPressUpCallback;
-    using LongPressUpCallback = void (*)(byte);
+    using LongPressUpCallback = void (*)(byte inputIndex);
     LongPressUpCallback *inputsLongPressUpCallback;
     elapsedMillis *inputsPressTime;
     bool *inputsLongPressDownFired;
-    using PotentiometerChangeCallback = void (*)(byte, float, int);
+    using PotentiometerChangeCallback = void (*)(byte inputIndex, float value, int diffToPrevious);
     PotentiometerChangeCallback *inputsPotentiometerChangeCallback;
-    using RotaryChangeCallback = void (*)(byte, bool);
+    using RotaryChangeCallback = void (*)(byte inputIndex, bool value);
     RotaryChangeCallback *inputsRotaryChangeCallback;
 
     // Callbacks triggers
@@ -239,13 +239,13 @@ class Motherboard{
     void triggerRotaryChangeCallback(byte inputIndex, bool value);
 
     // MIDI Callbacks
-    using MidiNoteOnCallback = void (*)(byte, byte, byte);
+    using MidiNoteOnCallback = void (*)(byte channel, byte note, byte velocity);
     MidiNoteOnCallback midiNoteOnCallback;
-    using MidiNoteOffCallback = void (*)(byte, byte, byte);
+    using MidiNoteOffCallback = void (*)(byte channel, byte note, byte velocity);
     MidiNoteOffCallback midiNoteOffCallback;
-    using GlobalMidiControlChangeCallback = void (*)(byte, byte, byte);
+    using GlobalMidiControlChangeCallback = void (*)(byte channel, byte control, byte value);
     GlobalMidiControlChangeCallback globalMidiControlChangeCallback = nullptr;
-    using MidiSysExCallback = void (*)(const uint8_t*, uint16_t, bool);
+    using MidiSysExCallback = void (*)(const uint8_t* data, uint16_t length, bool last);
     MidiSysExCallback midiSysExCallback = nullptr;
     using MidiControlChangeCallbackFunction = void (*)(byte, byte, byte);
     struct MidiControlChangeCallback{
@@ -1138,7 +1138,9 @@ inline byte Motherboard::getMidiChannel() {
 }
 
 /**
- * Handle press down on a button
+ * Set handle press down on a button
+ * @param inputIndex The index of the input
+ * @param fptr The callback function, void (*)(byte inputIndex)
  */
 inline void Motherboard::setHandlePressDown(byte inputIndex, PressDownCallback fptr){
   // Press can only happen on a button and an encoder's switch
@@ -1148,7 +1150,9 @@ inline void Motherboard::setHandlePressDown(byte inputIndex, PressDownCallback f
 }
 
 /**
- * Handle press up on a button
+ * Set handle press up on a button
+ * @param inputIndex The index of the input
+ * @param fptr The callback function, void (*)(byte inputIndex)
  */
 inline void Motherboard::setHandlePressUp(byte inputIndex, PressUpCallback fptr){
   // Press can only happen on a button and an encoder's switch
@@ -1158,7 +1162,9 @@ inline void Motherboard::setHandlePressUp(byte inputIndex, PressUpCallback fptr)
 }
 
 /**
- * Handle long press down on a button
+ * Set handle long press down on a button
+ * @param inputIndex The index of the input
+ * @param fptr The callback function, void (*)(byte inputIndex)
  */
 inline void Motherboard::setHandleLongPressDown(byte inputIndex, LongPressDownCallback fptr){
   // Press can only happen on a button and an encoder's switch
@@ -1168,7 +1174,9 @@ inline void Motherboard::setHandleLongPressDown(byte inputIndex, LongPressDownCa
 }
 
 /**
- * Handle long press up on a button
+ * Set handle long press up on a button
+ * @param inputIndex The index of the input
+ * @param fptr The callback function, void (*)(byte inputIndex)
  */
 inline void Motherboard::setHandleLongPressUp(byte inputIndex, LongPressUpCallback fptr){
   // Press can only happen on a button and an encoder's switch
@@ -1178,7 +1186,9 @@ inline void Motherboard::setHandleLongPressUp(byte inputIndex, LongPressUpCallba
 }
 
 /**
- * Handle potentiometer
+ * Set handle potentiometer change
+ * @param inputIndex The index of the input
+ * @param fptr The callback function, void (*)(byte inputIndex, float value, int diffToPrevious)
  */
 inline void Motherboard::setHandlePotentiometerChange(byte inputIndex, PotentiometerChangeCallback fptr){
   // Only for rotaries
@@ -1188,7 +1198,9 @@ inline void Motherboard::setHandlePotentiometerChange(byte inputIndex, Potentiom
 }
 
 /**
- * Handle rotary
+ * Set handle rotary change
+ * @param inputIndex The index of the input
+ * @param fptr The callback function, void (*)(byte inputIndex, bool value)
  */
 inline void Motherboard::setHandleRotaryChange(byte inputIndex, RotaryChangeCallback fptr){
   // Only for rotaries
@@ -1204,7 +1216,8 @@ inline void Motherboard::writeLED(byte index){
 
 
 /**
- * Handle MIDI note on
+ * Set handle MIDI note on
+ * @param fptr The callback function, void (*)(byte channel, byte note, byte velocity)
  */
 inline void Motherboard::setHandleMidiNoteOn(MidiNoteOnCallback fptr){
   this->midiNoteOnCallback = fptr;
@@ -1213,7 +1226,8 @@ inline void Motherboard::setHandleMidiNoteOn(MidiNoteOnCallback fptr){
 }
 
 /**
- * Handle MIDI note off
+ * Set handle MIDI note off
+ * @param fptr The callback function, void (*)(byte channel, byte note, byte velocity)
  */
 inline void Motherboard::setHandleMidiNoteOff(MidiNoteOffCallback fptr){
   this->midiNoteOffCallback = fptr;
@@ -1222,21 +1236,29 @@ inline void Motherboard::setHandleMidiNoteOff(MidiNoteOffCallback fptr){
 }
 
 /**
- * Handle MIDI control change
+ * Set handle MIDI global control change
+ * @param fptr The callback function, void (*)(byte channel, byte control, byte value)
  */
 inline void Motherboard::setHandleGlobalMidiControlChange(GlobalMidiControlChangeCallback fptr){
   this->globalMidiControlChangeCallback = fptr;
 }
 
 /**
- * Handle MIDI control change
+ * Set handle MIDI control change
+ * @param control The control number
+ * @param controlName The name of the control
+ * @param fptr The callback function, void (*)(byte channel, byte control, byte value)
  */
 inline void Motherboard::setHandleMidiControlChange(byte control, String controlName, MidiControlChangeCallbackFunction fptr){
   this->setHandleMidiControlChange(0, control, controlName, fptr);
 }
 
 /**
- * Set a callback to a MIDI control change message
+ * Set handle MIDI control change
+ * @param channe; The channel number
+ * @param control The control number
+ * @param controlName The name of the control
+ * @param fptr The callback function, void (*)(byte channel, byte control, byte value)
  */
 inline void Motherboard::setHandleMidiControlChange(byte channel, byte control, String controlName, MidiControlChangeCallbackFunction fptr){
   // Init the midi control with what is set in the code
@@ -1312,7 +1334,8 @@ inline void Motherboard::handleMidiControlChange(byte channel, byte control, byt
 }
 
 /**
- * Handle MIDI SysEx
+ * Set handle MIDI SysEx
+ * @param fptr The callback function, void (*)(const uint8_t* data, uint16_t length, bool last)
  */
 inline void Motherboard::setHandleMidiSysEx(MidiSysExCallback fptr){
   this->midiSysExCallback = fptr;
