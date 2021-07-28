@@ -6,18 +6,11 @@
 #include <MIDI.h>
 MIDI_CREATE_DEFAULT_INSTANCE(); // MIDI library init
 
+
 /**
  * Motherboard
- * v1.0.0
+ * v2.0.0
  */
-
-enum InputType {
-  None = 0,
-  Button = 1,
-  Potentiometer = 2,
-  RotaryEncoder = 3
-};
-
 class Motherboard{
 
   private:
