@@ -22,59 +22,30 @@ https://github.com/ghostintranslation
 
 #include "Motherboard.h"
 
-// Motherboard
-Motherboard * device;
-  
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  
-  while (!Serial && millis() < 2500); // wait for serial monitor
+
+  while (!Serial && millis() < 2500)
+    ; // wait for serial monitor
 
   // Motherboard
-  device = Motherboard::init(
-    "Motherboard",
-    {
-      Potentiometer, Potentiometer,
-      Potentiometer, Potentiometer,
-      Potentiometer, Potentiometer
-    }
-  );
-  
-  // Potentiometer callback
-  device->setHandlePotentiometerChange(0, onPotentiometerChange);
-
-  // MIDI callback
-  device->setHandleMidiControlChange(0, 0,  "Parameter",   onMidiControlChange);
+  Motherboard.init("Motherboard", 2,
+                   {Potentiometer, Potentiometer,
+                    Potentiometer, Button,
+                    Potentiometer, Potentiometer},
+                   {CV});
 
   Serial.println("Ready!");
 }
 
-void loop() {
-  device->update();
-}
-
-/**
- * Potentiometer Change
- */
-void onPotentiometerChange(byte inputIndex, float value, int diffToPrevious){
-  Serial.print("onPotentiometerChange: ");
-  Serial.print(inputIndex);
-  Serial.print(" ");
-  Serial.print(value);
-  Serial.print(" ");
-  Serial.print(diffToPrevious);
-  Serial.println("");
-}
-
-/**
- * Midi Control Change callback
- */
-void onMidiControlChange(byte channel, byte control, byte value) {
-  Serial.print("onMidiControlChange: ");
-  Serial.print(channel);
-  Serial.print(" ");
-  Serial.print(control);
-  Serial.print(" ");
-  Serial.print(value);
-  Serial.println("");
+void loop()
+{
+  Motherboard.update();
+  //  for(int i=0; i<6; i++){
+  //    Serial.print(Motherboard.getInputValue(i));
+  //    Serial.print(" ");
+  //  }
+  //  Serial.println("");
+  Motherboard.setLED(0, Led::Status::On, Motherboard.getInputValue(0));
 }

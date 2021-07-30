@@ -3,9 +3,10 @@
 
 #include "IO.h"
 
-class Output : IO {
-  public:
-    virtual void write();// TODO: NEED?
+class Output : public IO
+{
+public:
+    //    virtual void write(); // TODO: NEED?
 };
 
 #endif
