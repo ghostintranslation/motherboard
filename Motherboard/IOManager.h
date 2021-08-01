@@ -18,18 +18,18 @@ using PressUpCallback = void (*)(byte);
 using LongPressUpCallback = void (*)(byte);
 using ChangeCallback = void (*)(byte inputIndex, unsigned int value, int diff);
 
-#include <SPI.h>
 #include "Potentiometer.h"
 #include "Button.h"
+#include "RotaryEncoder.h"
+#include "CvIn.h"
+#include "ToggleOnOn.h"
+#include "ToggleOnOffOn.h"
 #include "Led.h"
-#include "CV.h"
-#include <vector>
+#include "CvOut.h"
 
 class IOManager
 {
 public:
-    // Singleton
-    static IOManager *getInstance();
 
     // Init
     void init(byte columnNumber, std::vector<Input *> inputs, std::vector<Output *> outputs);
@@ -52,6 +52,11 @@ public:
     void setHandleChange(byte inputIndex, ChangeCallback fptr);
 
 private:
+    friend class Motherboard;
+  
+    // Singleton
+    static IOManager *getInstance();
+    
     // Singleton
     static IOManager *instance;
     IOManager();
@@ -238,7 +243,7 @@ inline void IOManager::readWriteIO()
     {
         shiftRegistersData = 0x00;
     }
-    shiftRegistersData = shiftRegistersData | this->currentInputIndex << 4 | 0x0F ^ 0x01 << currentOutputDacIndex;
+    shiftRegistersData = shiftRegistersData | this->currentInputIndex << 4 | (0x0F ^ 0x01 << currentOutputDacIndex);
 
     int ledsData = 0;
 
@@ -405,6 +410,4 @@ inline unsigned int IOManager::getAnalogMaxValue()
     return (1 << this->analogResolution) - 1;
 }
 
-// Instanciating
-IOManager &IOManager = *IOManager::getInstance();
 #endif

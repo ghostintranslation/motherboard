@@ -4,7 +4,7 @@
 \_|| |\_/__) |    _|_| |    | | \| || |__)|__| | | _|_\_/| |
 
 MOTHERBOARD
-1.0.0
+2.0.0
 
 Support my work:
 https://www.paypal.com/paypalme/ghostintranslation
@@ -34,7 +34,7 @@ void setup()
                    {Potentiometer, Potentiometer,
                     Potentiometer, Button,
                     Potentiometer, Potentiometer},
-                   {CV});
+                   {CvOut});
 
   Serial.println("Ready!");
 }
@@ -47,5 +47,5 @@ void loop()
   //    Serial.print(" ");
   //  }
   //  Serial.println("");
-  Motherboard.setLED(0, Led::Status::On, Motherboard.getInputValue(0));
+  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, Motherboard.getInputValue(0));
 }

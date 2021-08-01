@@ -1,8 +1,12 @@
 #ifndef Motherboard_h
 #define Motherboard_h
 
-#include "IOManager.h"
+#include <SPI.h>
 #include <vector>
+
+namespace MotherboardNamespace{
+  
+#include "ioManager.h"
 
 /** 
  * Motherboard
@@ -14,6 +18,8 @@ class Motherboard
 private:
   static Motherboard *instance;
   Motherboard();
+
+  IOManager* ioManager;
 
 public:
   static Motherboard *getInstance();
@@ -62,9 +68,9 @@ inline Motherboard *Motherboard::getInstance()
  */
 inline void Motherboard::init(String deviceName, int columnNumber, std::vector<Input *> inputs, std::vector<Output *> outputs)
 {
-
-  IOManager.init(columnNumber, inputs, outputs);
-  //  IOManager.getMidiChannel();
+  this->ioManager = IOManager::getInstance();
+  ioManager->init(columnNumber, inputs, outputs);
+  //  ioManager->getMidiChannel();
   //
   //  // Init sequence
   //  this->initSequence();
@@ -75,7 +81,7 @@ inline void Motherboard::init(String deviceName, int columnNumber, std::vector<I
  */
 inline void Motherboard::update()
 {
-  IOManager.update();
+  ioManager->update();
 
   // Debug
   // if (this->clockDebug >= 100) {
@@ -90,7 +96,7 @@ inline void Motherboard::update()
  */
 inline void Motherboard::setLED(byte index, Led::Status status, unsigned int brightness)
 {
-  IOManager.setLED(index, status, brightness);
+  ioManager->setLED(index, status, brightness);
 }
 
 /**
@@ -98,7 +104,7 @@ inline void Motherboard::setLED(byte index, Led::Status status, unsigned int bri
  */
 inline void Motherboard::toggleLED(byte index)
 {
-  //   IOManager.toggleLed(index);
+  //   ioManager->toggleLed(index);
 }
 
 /**
@@ -106,7 +112,7 @@ inline void Motherboard::toggleLED(byte index)
  */
 inline void Motherboard::resetAllLED()
 {
-  //   IOManager.resetAllLED(index);
+  //   ioManager->resetAllLED(index);
 }
 
 /**
@@ -115,7 +121,7 @@ inline void Motherboard::resetAllLED()
  */
 inline float Motherboard::getInputValue(byte index)
 {
-  return IOManager.getInputValue(index);
+  return ioManager->getInputValue(index);
 }
 
 /**
@@ -123,7 +129,7 @@ inline float Motherboard::getInputValue(byte index)
  */
 inline int Motherboard::getAnalogMinValue()
 {
-  return IOManager.getAnalogMinValue();
+  return ioManager->getAnalogMinValue();
 }
 
 /**
@@ -131,12 +137,12 @@ inline int Motherboard::getAnalogMinValue()
  */
 inline int Motherboard::getAnalogMaxValue()
 {
-  //  return IOManager.getAnalogMaxValue();
+    return ioManager->getAnalogMaxValue();
 }
 
 inline byte Motherboard::getMidiChannel()
 {
-  return IOManager.getMidiChannel();
+  return ioManager->getMidiChannel();
 }
 
 /**
@@ -146,7 +152,7 @@ inline byte Motherboard::getMidiChannel()
  */
 inline void Motherboard::setHandlePressDown(byte inputIndex, PressDownCallback fptr)
 {
-  IOManager.setHandlePressDown(inputIndex, fptr);
+  ioManager->setHandlePressDown(inputIndex, fptr);
 }
 
 /**
@@ -156,7 +162,7 @@ inline void Motherboard::setHandlePressDown(byte inputIndex, PressDownCallback f
  */
 inline void Motherboard::setHandlePressUp(byte inputIndex, PressUpCallback fptr)
 {
-  IOManager.setHandlePressUp(inputIndex, fptr);
+  ioManager->setHandlePressUp(inputIndex, fptr);
 }
 
 /**
@@ -166,7 +172,7 @@ inline void Motherboard::setHandlePressUp(byte inputIndex, PressUpCallback fptr)
  */
 inline void Motherboard::setHandleLongPressDown(byte inputIndex, LongPressDownCallback fptr)
 {
-  IOManager.setHandleLongPressDown(inputIndex, fptr);
+  ioManager->setHandleLongPressDown(inputIndex, fptr);
 }
 
 /**
@@ -176,7 +182,7 @@ inline void Motherboard::setHandleLongPressDown(byte inputIndex, LongPressDownCa
  */
 inline void Motherboard::setHandleLongPressUp(byte inputIndex, LongPressUpCallback fptr)
 {
-  IOManager.setHandleLongPressUp(inputIndex, fptr);
+  ioManager->setHandleLongPressUp(inputIndex, fptr);
 }
 
 /**
@@ -186,7 +192,7 @@ inline void Motherboard::setHandleLongPressUp(byte inputIndex, LongPressUpCallba
  */
 inline void Motherboard::setHandleChange(byte inputIndex, ChangeCallback fptr)
 {
-  IOManager.setHandleChange(inputIndex, fptr);
+  ioManager->setHandleChange(inputIndex, fptr);
 }
 
 /**
@@ -196,6 +202,8 @@ inline void Motherboard::initSequence()
 {
 }
 
+}
 // Instanciating
-Motherboard &Motherboard = *Motherboard::getInstance();
+MotherboardNamespace::Motherboard &Motherboard = *MotherboardNamespace::Motherboard::getInstance();
+
 #endif

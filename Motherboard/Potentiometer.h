@@ -13,12 +13,9 @@ public:
 
 inline void Potentiometer::read()
 {
-  //   Serial.print("Potentiometer: ");
-  //   Serial.println(this->needsGround());
-
   pinMode(this->pin, INPUT);
-  unsigned int val = analogRead(this->pin);
-  val = map(constrain(val, 8, 4095), 8, 4095, 0, 4095); // Potentiometers
+  int val = analogRead(this->pin);
+  val = map(constrain(val, 8, 4095), 8, 4095, 0, 4095); // TODO: ADD ANALOG MIN-MAX TO INPUT
 
   this->setTarget(val);
 }
@@ -34,6 +31,6 @@ inline String Potentiometer::getType()
 }
 
 // From now on "Potentiometer" will be replaced by "new Potentiometer()"
-#define Potentiometer new Potentiometer()
+#define Potentiometer new MotherboardNamespace::Potentiometer()
 
 #endif

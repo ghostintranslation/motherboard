@@ -1,5 +1,5 @@
-#ifndef button_h
-#define button_h
+#ifndef Button_h
+#define Button_h
 
 #include "Input.h"
 
@@ -34,7 +34,7 @@ inline void Button::read()
     // Serial.println(this->needsGround());
 
     pinMode(this->pin, INPUT_PULLUP);
-    unsigned int newReading = digitalRead(this->pin);
+    int newReading = digitalRead(this->pin);
 
     if (this->pressDownCallback != nullptr ||
         this->pressUpCallback != nullptr ||
@@ -153,6 +153,6 @@ inline String Button::getType()
 }
 
 // From now on "Button" will be replaced by "new Button()"
-#define Button new Button
+#define Button new MotherboardNamespace::Button
 
 #endif
