@@ -19,13 +19,14 @@ using LongPressUpCallback = void (*)(byte);
 using ChangeCallback = void (*)(byte inputIndex, unsigned int value, int diff);
 
 #include "Potentiometer.h"
-#include "Button.h"
+//#include "Button.h"
 #include "RotaryEncoder.h"
-#include "CvIn.h"
-#include "ToggleOnOn.h"
-#include "ToggleOnOffOn.h"
+//#include "CvIn.h"
+//#include "ToggleOnOn.h"
+//#include "ToggleOnOffOn.h"
 #include "Led.h"
 #include "CvOut.h"
+//#include "None.h"
 
 class IOManager
 {
@@ -37,7 +38,11 @@ public:
     // Update
     void update();
 
+    // Debug
+    void print();
+
     float getInputValue(byte index);
+    float getOutputValue(byte index);
     void setOutputValue(byte index, unsigned int value);
     void setLED(byte index, Led::Status status, unsigned int brightness);
     unsigned int getAnalogMaxValue();
@@ -167,15 +172,6 @@ inline void IOManager::update()
 {
     if (this->clockRefresh >= this->intervalRefresh)
     {
-        //      for(int i=0; i<this->inputNumber; i++){
-        //        Serial.println(this->inputs[i]->getType());
-        //      }
-        //
-        //      for(int i=0; i<this->outputNumber; i++){
-        //        Serial.println(this->outputs[i]->getType());
-        //      }
-        //      Serial.println("----");
-
         // Read the current input and set the current output
         this->readWriteIO();
 
@@ -194,18 +190,22 @@ inline void IOManager::update()
  */
 inline void IOManager::iterateIO()
 {
-    this->currentInputIndex++;
-    this->currentInputIndex = this->currentInputIndex % this->inputNumber;
-    while (this->inputs[this->currentInputIndex]->getType() == "None" && this->currentInputIndex < this->inputNumber)
-    {
-        this->currentInputIndex++;
+    if(this->inputNumber > 0){
+      this->currentInputIndex++;
+      this->currentInputIndex = this->currentInputIndex % this->inputNumber;
+      while (this->inputs[this->currentInputIndex]->getType() == "None" && this->currentInputIndex < this->inputNumber)
+      {
+          this->currentInputIndex++;
+      }
     }
 
-    this->currentOutputIndex++;
-    this->currentOutputIndex = this->currentOutputIndex % this->outputNumber;
-    while (this->outputs[this->currentOutputIndex]->getType() == "None" && this->currentOutputIndex < this->inputNumber)
-    {
-        this->currentOutputIndex++;
+    if(this->outputNumber > 0){
+      this->currentOutputIndex++;
+      this->currentOutputIndex = this->currentOutputIndex % this->outputNumber;
+      while (this->outputs[this->currentOutputIndex]->getType() == "None" && this->currentOutputIndex < this->outputNumber)
+      {
+          this->currentOutputIndex++;
+      }
     }
 }
 
@@ -275,20 +275,21 @@ inline void IOManager::readWriteIO()
     digitalWrite(REGISTERS_LATCH_PIN, HIGH);
 
     // Send the selected DAC data
-    // TODO: ONLY DO THAT IF OUTPUT IS NOT "NONE"
-    if (currentOutputDacChannel == 0)
-    {
-        // Channel A
-        SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-        SPI.transfer16(0x1000 | (int)this->outputs[this->currentOutputIndex]->getValue());
-        SPI.endTransaction();
-    }
-    else
-    {
-        // Channel B
-        SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-        SPI.transfer16(0x9000 | (int)this->outputs[this->currentOutputIndex]->getValue());
-        SPI.endTransaction();
+    if(this->outputNumber > 0 && this->outputs[this->currentOutputIndex]->getType() != "None"){
+      if (currentOutputDacChannel == 0)
+      {
+          // Channel A
+          SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
+          SPI.transfer16(0x1000 | (int)this->outputs[this->currentOutputIndex]->getValue());
+          SPI.endTransaction();
+      }
+      else
+      {
+          // Channel B
+          SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
+          SPI.transfer16(0x9000 | (int)this->outputs[this->currentOutputIndex]->getValue());
+          SPI.endTransaction();
+      }
     }
 
     // Set the latch to low (now shift registers are listening)
@@ -386,7 +387,24 @@ inline void IOManager::setLED(byte index, Led::Status status, unsigned int brigh
  */
 inline float IOManager::getInputValue(byte index)
 {
+  if(this->inputNumber > 0 && index < this->inputNumber){
     return this->inputs[index]->getValue();
+  }else{
+    return 0;
+  }
+}
+
+/**
+ * Get output value
+ * @param byte index The index of the output
+ */
+inline float IOManager::getOutputValue(byte index)
+{
+  if(this->outputNumber > 0 && index < this->outputNumber){
+    return this->outputs[index]->getValue();
+  }else{
+    return 0;
+  }
 }
 
 inline byte IOManager::getMidiChannel()
@@ -408,6 +426,21 @@ inline unsigned int IOManager::getAnalogMinValue()
 inline unsigned int IOManager::getAnalogMaxValue()
 {
     return (1 << this->analogResolution) - 1;
+}
+
+inline void IOManager::print(){
+  Serial.print("Inputs: ");
+  for(int i=0; i<this->inputNumber; i++){
+    this->inputs[i]->print();
+    Serial.print(" ");
+  }
+  Serial.println("");
+
+  Serial.print("Outputs: ");
+  for(int i=0; i<this->outputNumber; i++){
+    this->outputs[i]->print();
+  }
+  Serial.println("");
 }
 
 #endif

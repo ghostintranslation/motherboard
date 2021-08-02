@@ -7,6 +7,9 @@ public:
 
     virtual String getType() = 0;
 
+    // Debug
+    virtual void print();
+    
     void update(unsigned int updateMillis);
     byte getIndex();
     void setIndex(byte index);
@@ -15,6 +18,7 @@ public:
     void setTarget(int target);
     unsigned int getSmoothing();
     void setSmoothing(byte smoothing);
+    
 
 protected:
     // The index starting at 0
@@ -84,7 +88,7 @@ inline void IO::update(unsigned int updateMillis)
 
     // Rounding the float to compare to 0, because otherwise it is actually never quite 0
     // and we don't need more than 2 decimal precision
-    if (roundf(this->value * 100) / 100 == 0)
+    if (abs(this->target) > 5 && roundf(this->value * 100) / 100 == 0)
     {
         this->value = 0;
     }
@@ -96,5 +100,13 @@ inline void IO::update(unsigned int updateMillis)
     {
         this->onValueChange();
     }
+    
+    this->previousValue = this->value;
 }
+
+inline void IO::print()
+{
+    Serial.print(this->value);
+}
+
 #endif

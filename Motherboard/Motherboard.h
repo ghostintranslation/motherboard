@@ -21,6 +21,9 @@ private:
 
   IOManager* ioManager;
 
+  bool debug;
+  elapsedMillis clockDebug;
+
 public:
   static Motherboard *getInstance();
   void init(String deviceName, int columnNumber, std::vector<Input *> inputs, std::vector<Output *> outputs);
@@ -41,6 +44,8 @@ public:
   void setHandlePressUp(byte inputIndex, PressUpCallback fptr);
   void setHandleLongPressUp(byte inputIndex, LongPressUpCallback fptr);
   void setHandleChange(byte inputIndex, ChangeCallback fptr);
+
+  void setDebug(bool debug);
 };
 
 // Instance pre init
@@ -84,11 +89,10 @@ inline void Motherboard::update()
   ioManager->update();
 
   // Debug
-  // if (this->clockDebug >= 100) {
-  //   //    this->printInputs();
-  //   //    this->printLeds();
-  //   this->clockDebug = 0;
-  // }
+   if (this->debug && this->clockDebug >= 10) {
+     ioManager->print();
+     this->clockDebug = 0;
+   }
 }
 
 /**
@@ -200,6 +204,11 @@ inline void Motherboard::setHandleChange(byte inputIndex, ChangeCallback fptr)
  */
 inline void Motherboard::initSequence()
 {
+}
+
+inline void Motherboard::setDebug(bool debug)
+{
+  this->debug = debug;
 }
 
 }

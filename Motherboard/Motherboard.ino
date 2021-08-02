@@ -31,10 +31,11 @@ void setup()
 
   // Motherboard
   Motherboard.init("Motherboard", 2,
-                   {Potentiometer, Potentiometer,
-                    Potentiometer, Button,
-                    Potentiometer, Potentiometer},
-                   {CvOut});
+                   {
+                    Potentiometer, RotaryEncoder
+                   },
+                   {});
+  Motherboard.setDebug(true);
 
   Serial.println("Ready!");
 }
@@ -42,10 +43,6 @@ void setup()
 void loop()
 {
   Motherboard.update();
-  //  for(int i=0; i<6; i++){
-  //    Serial.print(Motherboard.getInputValue(i));
-  //    Serial.print(" ");
-  //  }
-  //  Serial.println("");
-  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, Motherboard.getInputValue(0));
+
+//  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, Motherboard.getInputValue(0));
 }
