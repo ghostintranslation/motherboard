@@ -19,26 +19,27 @@ public:
   String getType() override;
 
   void update(unsigned int updateMillis);
-  void setStatus(Status status);
+  void set(Status status, int brightness);
 
 private:
   Status status;
 
-  unsigned int blinkTarget;
+  // The value target requested
+  unsigned int requestedTarget;
 
   // Time counter for the blinking
   elapsedMillis blinkTime;
 };
 
-inline void Led::setStatus(Status status)
+inline void Led::set(Status status, int brightness)
 {
   this->status = status;
-  this->blinkTarget = this->target;
+  this->requestedTarget = brightness;
 
   switch (this->status)
   {
   case Off:
-    this->target = 0;
+    this->requestedTarget = 0;
     break;
   case BlinkOnce:
     this->blinkTime = 0;
@@ -61,27 +62,30 @@ inline void Led::update(unsigned int updateMillis)
     }
     else
     {
-      this->target = this->blinkTarget;
+      this->target = this->requestedTarget;
     }
     break;
   case BlinkFast:
-    if (this->blinkTime % 200 < 200)
+    if (this->blinkTime % 200 < 100)
     {
       this->target = 0;
     }
     else
     {
-      this->target = this->blinkTarget;
+      this->target = this->requestedTarget;
     }
     break;
   case BlinkOnce:
-    if (this->blinkTime > 200)
+    if (this->blinkTime > 100)
     {
       this->target = 0;
+    }else{
+      this->target = this->requestedTarget;
     }
     break;
 
   default:
+      this->target = this->requestedTarget;
     break;
   }
 }

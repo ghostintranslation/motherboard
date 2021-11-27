@@ -35,6 +35,6 @@ inline String ToggleOnOn::getType()
 }
 
 // From now on "ToggleOnOn" will be replaced by "new ToggleOnOn()"
-#define ToggleOnOn new ToggleOnOn()
+#define ToggleOnOn new MotherboardNamespace::ToggleOnOn()
 
 #endif

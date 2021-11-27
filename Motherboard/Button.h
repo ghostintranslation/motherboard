@@ -8,106 +8,58 @@ class Button : public Input
 public:
     void read() override;
     bool needsGround() override;
-    void setPressDownCallback(PressDownCallback pressDownCallback) override;
-    void setLongPressDownCallback(LongPressDownCallback longPressDownCallback) override;
-    void setPressUpCallback(PressUpCallback pressUpCallback) override;
-    void setLongPressUpCallback(LongPressUpCallback longPressUpCallback) override;
     String getType() override;
+    
+    // On value change callback
+    void onValueChange() override;
+  
+    void setOnPressStart(EdgeCallback pressStartCallback);
+    
+    void setOnLongPressStart(EdgeCallback longPressStartCallback);
+    
+    void setOnPressEnd(EdgeCallback pressEndCallback);
+    
+    void setOnLongPressEnd(EdgeCallback longPressEndCallback);
 
 private:
+    // Press start callback
+    EdgeCallback pressStartCallback;
+    
+    // Long press start callback
+    EdgeCallback longPressStartCallback;
+    
+    // Press end callback
+    EdgeCallback pressEndCallback;
+    
+    // Long press end callback
+    EdgeCallback longPressEndCallback;
+
+    // How long is a long press in ms
+    unsigned int longPressDuration = 200;
+    
+    // Has the long press start callback been fired already?
+    bool longPressStartFired;
+    
     // Time counter for long vs short press
     elapsedMillis pressTime;
-
-    // Has the long press down callback been fired already?
-    bool longPressDownFired;
-
-    // Callbacks functions
-    PressDownCallback pressDownCallback;
-    LongPressDownCallback longPressDownCallback;
-    PressUpCallback pressUpCallback;
-    LongPressUpCallback longPressUpCallback;
 };
+
 
 inline void Button::read()
 {
-    // Serial.print("Button: ");
-    // Serial.println(this->needsGround());
-
-    pinMode(this->pin, INPUT_PULLUP);
-    int newReading = digitalRead(this->pin);
-
-    if (this->pressDownCallback != nullptr ||
-        this->pressUpCallback != nullptr ||
-        this->longPressDownCallback != nullptr ||
-        this->longPressUpCallback != nullptr)
-    {
-
-        // Inverted logic, 0 = button pushed
-        // If previous value is not pushed and now is pushed
-        // So if it's pushed
-        if (this->value && !newReading)
-        {
-            // Start the counter of that input
-            this->pressTime = 0;
-            this->longPressDownFired = false;
-
-            // If there is a short press down callback on that input, and there is no Long Press down
-            if (this->longPressDownCallback == nullptr &&
-                this->pressDownCallback != nullptr)
-            {
-                this->pressDownCallback(this->index);
-            }
-        }
-
-        // If it stayed pressed for 200ms and Long Press Down callback hasn't been fired yet
-        if (!this->value && !newReading)
-        {
-            if (this->pressTime >= 200 && !this->longPressDownFired)
-            {
-
-                if (this->longPressDownCallback != nullptr)
-                {
-                    // Fire the callback
-                    this->longPressDownCallback(this->index);
-                    this->longPressDownFired = true;
-                }
-            }
-        }
-
-        // If it's released
-        if (!this->value && newReading)
-        {
-            // How long was it pressed
-            if (this->pressTime < 200)
-            {
-                // Short press
-
-                // If there is a short press callback on that input
-                if (this->pressUpCallback != nullptr)
-                {
-                    this->pressUpCallback(this->index);
-                }
-            }
-            else
-            {
-                // Long press
-
-                // If there is a long press callback on that input
-                if (this->longPressUpCallback != nullptr)
-                {
-                    this->longPressUpCallback(this->index);
-                }
-                else if (this->pressUpCallback != nullptr)
-                {
-                    // If the input was pressed for a long time but there is only a short press callback
-                    // the short press callback should still be called
-                    this->pressUpCallback(this->index);
-                }
-            }
-        }
+    // Debouncing
+    if(this->debounceTime < this->debounceDelay){
+      return;
     }
 
-    this->setTarget(newReading);
+    pinMode(this->pin, INPUT_PULLDOWN);
+//    int newReading = digitalRead(this->pin);
+    int newReading = map(constrain(analogRead(this->pin), 0, 1000), 0, 1000, 0, 1);
+    
+
+    // In the case of a digital input, there is no in-between values, so the target and the actual value are equal
+    this->target = newReading;
+    this->value = newReading;
 }
 
 inline bool Button::needsGround()
@@ -115,44 +67,108 @@ inline bool Button::needsGround()
     return true;
 }
 
-/**
- * Set the press down callback
- */
-inline void Button::setPressDownCallback(PressDownCallback fptr)
-{
-    this->pressDownCallback = fptr;
-}
-
-/**
- * Set the long press down callback
- */
-inline void Button::setLongPressDownCallback(LongPressDownCallback fptr)
-{
-    this->longPressDownCallback = fptr;
-}
-
-/**
- * Set the press up callback
- */
-inline void Button::setPressUpCallback(PressUpCallback fptr)
-{
-    this->pressUpCallback = fptr;
-}
-
-/**
- * Set the long press up callback
- */
-inline void Button::setLongPressUpCallback(LongPressUpCallback fptr)
-{
-    this->longPressUpCallback = fptr;
-}
-
 inline String Button::getType()
 {
-    return "Button";
+  return "Button";
+}
+
+inline void Button::setOnPressStart(EdgeCallback pressStartCallback){
+  this->pressStartCallback = pressStartCallback;
+}
+
+inline void Button::setOnLongPressStart(EdgeCallback longPressStartCallback){
+  this->longPressStartCallback = longPressStartCallback;
+}
+
+inline void Button::setOnPressEnd(EdgeCallback pressEndCallback){
+  this->pressEndCallback = pressEndCallback;
+}
+
+inline void Button::setOnLongPressEnd(EdgeCallback longPressEndCallback){
+  this->longPressEndCallback = longPressEndCallback;
+}
+
+/**
+ * On value change call the callback.
+ * This function is called in the IO class.
+ */
+inline void Button::onValueChange()
+{
+  Input::onValueChange();
+
+  if (this->pressStartCallback != nullptr ||
+      this->pressEndCallback != nullptr ||
+      this->longPressStartCallback != nullptr ||
+      this->longPressEndCallback != nullptr){
+      this->debounceTime = 0;
+
+      // If it's pressed
+      if (this->value && !this->previousValue)
+      {
+          // Start the counter of that input
+          this->pressTime = 0;
+          this->longPressStartFired = false;
+
+          // If there is a short press down callback on that input, and there is no Long Press down
+          if (this->longPressStartCallback == nullptr &&
+              this->pressStartCallback != nullptr)
+          {
+              this->pressStartCallback(this->index);
+          }
+      }
+
+      // If it stayed pressed for some time and Long Press Start callback hasn't been fired yet
+      if (this->value && this->previousValue)
+      {
+          if (this->pressTime >= this->longPressDuration && !this->longPressStartFired)
+          {
+
+              if (this->longPressStartCallback != nullptr)
+              {
+                  // Fire the callback
+                  this->longPressStartCallback(this->index);
+                  this->longPressStartFired = true;
+              }
+          }
+      }
+
+      // If it's released
+      if (!this->value && this->previousValue)
+      {
+          // How long was it pressed
+          if (this->pressTime < this->longPressDuration)
+          {
+              // Short press
+
+              // If there is a short press callback on that input
+              if (this->pressEndCallback != nullptr)
+              {
+                  this->pressEndCallback(this->index);
+              }
+          }
+          else
+          {
+              // Long press
+
+              // If there is a long press callback on that input
+              if (this->longPressEndCallback != nullptr)
+              {
+                  this->longPressEndCallback(this->index);
+              }
+              else if (this->pressEndCallback != nullptr)
+              {
+                  // If the input was pressed for a long time but there is only a short press callback
+                  // the short press callback should still be called
+                  this->pressEndCallback(this->index);
+              }
+          }
+      }
+  }
+  
 }
 
 // From now on "Button" will be replaced by "new Button()"
-#define Button new MotherboardNamespace::Button
+//#define Button new MotherboardNamespace::Button()
+#define Button MotherboardNamespace::Button
 
 #endif

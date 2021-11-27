@@ -12,21 +12,26 @@
 #define ANALOG_IN_1_PIN 14
 
 // Callback types
-using PressDownCallback = void (*)(byte);
-using LongPressDownCallback = void (*)(byte);
-using PressUpCallback = void (*)(byte);
-using LongPressUpCallback = void (*)(byte);
-using ChangeCallback = void (*)(byte inputIndex, unsigned int value, int diff);
+//using TriggerDownCallback = void (*)(byte);
+//using LongTriggerDownCallback = void (*)(byte);
+//using TriggerUpCallback = void (*)(byte);
+//using LongTriggerUpCallback = void (*)(byte);
+using EdgeCallback = void (*)(byte);
+using ChangeCallback = void (*)(byte inputIndex, float value, float diff);
+using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 
+#include "Button.h"
+#include "Trigger.h"
+#include "Gate.h"
 #include "Potentiometer.h"
-//#include "Button.h"
 #include "RotaryEncoder.h"
-//#include "CvIn.h"
-//#include "ToggleOnOn.h"
-//#include "ToggleOnOffOn.h"
+#include "TouchPad.h"
+#include "CvIn.h"
+#include "ToggleOnOn.h"
+#include "ToggleOnOffOn.h"
 #include "Led.h"
 #include "CvOut.h"
-//#include "None.h"
+#include "None.h"
 
 class IOManager
 {
@@ -45,18 +50,21 @@ public:
     float getOutputValue(byte index);
     void setOutputValue(byte index, unsigned int value);
     void setLED(byte index, Led::Status status, unsigned int brightness);
+    void setSmoothing(byte smoothing);
     unsigned int getAnalogMaxValue();
     unsigned int getAnalogMinValue();
     byte getMidiChannel();
 
     // Callbacks
-    void setHandlePressDown(byte inputIndex, PressDownCallback fptr);
-    void setHandleLongPressDown(byte inputIndex, LongPressDownCallback fptr);
-    void setHandlePressUp(byte inputIndex, PressUpCallback fptr);
-    void setHandleLongPressUp(byte inputIndex, LongPressUpCallback fptr);
-    void setHandleChange(byte inputIndex, ChangeCallback fptr);
+//    void setHandleTriggerDown(byte inputIndex, TriggerDownCallback fptr);
+//    void setHandleLongTriggerDown(byte inputIndex, LongTriggerDownCallback fptr);
+//    void setHandleTriggerUp(byte inputIndex, TriggerUpCallback fptr);
+//    void setHandleLongTriggerUp(byte inputIndex, LongTriggerUpCallback fptr);
+//    void setHandleChange(byte inputIndex, ChangeCallback fptr);
+//    void setHandleChangeQuantized(byte inputIndex, ChangeQuantizedCallback fptr);
 
 private:
+    // Only Motherboard can access this instance
     friend class Motherboard;
   
     // Singleton
@@ -83,9 +91,14 @@ private:
     void updateIO();
     void readWriteIO();
 
+    
+static void handleMidiControlChange(byte channel, byte controlNumber, byte value);
+
     // Refresh clock
-    const unsigned int intervalRefresh = 2;
+    const unsigned int intervalRefresh = 4;
     elapsedMicros clockRefresh;
+    const unsigned int intervalRefresh2 = 20000;
+    elapsedMicros clockRefresh2;
 
     // PWM clock
     const float intervalPWM = 20000;
@@ -114,8 +127,6 @@ inline IOManager *IOManager::getInstance()
 
 inline void IOManager::init(byte columnNumber, std::vector<Input *> inputs, std::vector<Output *> outputs)
 {
-    Serial.println("init");
-
     byte i = 0;
     this->inputNumber = inputs.size();
     this->inputs = new Input *[this->inputNumber];
@@ -123,7 +134,14 @@ inline void IOManager::init(byte columnNumber, std::vector<Input *> inputs, std:
     {
         this->inputs[i] = input;
         this->inputs[i]->setIndex(i);
+        
         input->setPin(ANALOG_IN_1_PIN); //TODO: MAKE IT DYNAMIC
+        input->setAnalogMaxValue(this->getAnalogMaxValue());
+
+        // If the input has a midi control number then add a callback on this midi CC number to set the value of this input
+//        if(input->getMidiControlNumber() > -1){
+//          MidiManager::getInstance()->onMidiControlChange(input->getMidiControlNumber(), this->handleMidiControlChange);
+//        }
         i++;
     }
 
@@ -133,6 +151,7 @@ inline void IOManager::init(byte columnNumber, std::vector<Input *> inputs, std:
     for (Output *output : outputs)
     {
         this->outputs[i] = output;
+        this->outputs[i]->setIndex(i);
         i++;
     }
 
@@ -142,9 +161,8 @@ inline void IOManager::init(byte columnNumber, std::vector<Input *> inputs, std:
     for (int i = 0; i < this->ledNumber; i++)
     {
         this->leds[i] = new Led();
+        this->leds[i]->setIndex(i);
     }
-
-    Serial.println("init2");
 
     // Pin modes
     pinMode(MIDI_CHANNEL_A_PIN, INPUT_PULLUP);
@@ -161,8 +179,6 @@ inline void IOManager::init(byte columnNumber, std::vector<Input *> inputs, std:
     SPI.setDataMode(SPI_MODE0);
     SPI.setClockDivider(SPI_CLOCK_DIV2);
     SPI.begin();
-
-    Serial.println("init3");
 }
 
 /**
@@ -170,6 +186,14 @@ inline void IOManager::init(byte columnNumber, std::vector<Input *> inputs, std:
  */
 inline void IOManager::update()
 {
+    if (this->clockRefresh2 >= this->intervalRefresh2)
+    {
+        // Iterate to the next input and output
+        this->iterateIO();
+
+        this->clockRefresh2 = 0;
+    }
+    
     if (this->clockRefresh >= this->intervalRefresh)
     {
         // Read the current input and set the current output
@@ -178,8 +202,6 @@ inline void IOManager::update()
         // Update all inputs and outputs
         this->updateIO();
 
-        // Iterate to the next input and output
-        this->iterateIO();
 
         this->clockRefresh = 0;
     }
@@ -193,20 +215,21 @@ inline void IOManager::iterateIO()
     if(this->inputNumber > 0){
       this->currentInputIndex++;
       this->currentInputIndex = this->currentInputIndex % this->inputNumber;
-      while (this->inputs[this->currentInputIndex]->getType() == "None" && this->currentInputIndex < this->inputNumber)
+      while (this->inputs[this->currentInputIndex]->getType() == "None")
       {
           this->currentInputIndex++;
+          this->currentInputIndex = this->currentInputIndex % this->inputNumber;
       }
     }
-
-    if(this->outputNumber > 0){
-      this->currentOutputIndex++;
-      this->currentOutputIndex = this->currentOutputIndex % this->outputNumber;
-      while (this->outputs[this->currentOutputIndex]->getType() == "None" && this->currentOutputIndex < this->outputNumber)
-      {
-          this->currentOutputIndex++;
-      }
-    }
+//    if(this->outputNumber > 0){
+//      this->currentOutputIndex++;
+//      this->currentOutputIndex = this->currentOutputIndex % this->outputNumber;
+//      while (this->outputs[this->currentOutputIndex]->getType() == "None")
+//      {
+//          this->currentOutputIndex++;
+//          this->currentOutputIndex = this->currentOutputIndex % this->outputNumber;
+//      }
+//    }
 }
 
 /**
@@ -235,7 +258,15 @@ inline void IOManager::readWriteIO()
 
     // Preparing the shift register data
     unsigned long shiftRegistersData;
-    if (this->inputs[this->currentInputIndex]->needsGround())
+//    if (this->inputs[this->currentInputIndex]->needsGround())
+//    {
+//        shiftRegistersData = 0x80;
+//    }
+//    else
+//    {
+//        shiftRegistersData = 0x00;
+//    }
+    if (this->inputs[this->currentInputIndex]->getType() == "TouchPad")
     {
         shiftRegistersData = 0x80;
     }
@@ -318,57 +349,78 @@ inline void IOManager::updateIO()
 
     for (int i = 0; i < this->inputNumber; i++)
     {
-        inputs[i]->update(this->intervalRefresh);
+        this->inputs[i]->update(this->intervalRefresh);
     }
     for (int i = 0; i < this->outputNumber; i++)
     {
-        outputs[i]->update(this->intervalRefresh);
+        this->outputs[i]->update(this->intervalRefresh);
     }
     for (int i = 0; i < this->ledNumber; i++)
     {
-        leds[i]->update(this->intervalRefresh);
+        this->leds[i]->update(this->intervalRefresh);
     }
 }
 
-/**
- * Handle press down on a button
- */
-inline void IOManager::setHandlePressDown(byte index, PressDownCallback fptr)
-{
-    this->inputs[index]->setPressDownCallback(fptr);
+
+inline void IOManager::setSmoothing(byte smoothing){
+  for (int i = 0; i < this->inputNumber; i++)
+  {
+      this->inputs[i]->setSmoothing(smoothing);
+  }
+  for (int i = 0; i < this->outputNumber; i++)
+  {
+      this->outputs[i]->setSmoothing(smoothing);
+  }
 }
 
-/**
- * Handle press up on a button
- */
-inline void IOManager::setHandlePressUp(byte index, PressUpCallback fptr)
-{
-    this->inputs[index]->setPressUpCallback(fptr);
-}
 
-/**
- * Handle long press down on a button
- */
-inline void IOManager::setHandleLongPressDown(byte index, LongPressDownCallback fptr)
-{
-    this->inputs[index]->setLongPressDownCallback(fptr);
-}
-
-/**
- * Handle long press up on a button
- */
-inline void IOManager::setHandleLongPressUp(byte index, LongPressUpCallback fptr)
-{
-    this->inputs[index]->setLongPressUpCallback(fptr);
-}
-
-/**
- * Handle potentiometer
- */
-inline void IOManager::setHandleChange(byte index, ChangeCallback fptr)
-{
-    this->inputs[index]->setChangeCallback(fptr);
-}
+///**
+// * Handle press down on a button
+// */
+//inline void IOManager::setHandleTriggerDown(byte index, TriggerDownCallback fptr)
+//{
+//    this->inputs[index]->setTriggerDownCallback(fptr);
+//}
+//
+///**
+// * Handle press up on a button
+// */
+//inline void IOManager::setHandleTriggerUp(byte index, TriggerUpCallback fptr)
+//{
+//    this->inputs[index]->setTriggerUpCallback(fptr);
+//}
+//
+///**
+// * Handle long trigger down
+// */
+//inline void IOManager::setHandleLongTriggerDown(byte index, LongTriggerDownCallback fptr)
+//{
+//    this->inputs[index]->setLongTriggerDownCallback(fptr);
+//}
+//
+///**
+// * Handle long trigger up
+// */
+//inline void IOManager::setHandleLongTriggerUp(byte index, LongTriggerUpCallback fptr)
+//{
+//    this->inputs[index]->setLongTriggerUpCallback(fptr);
+//}
+//
+///**
+// * Handle change
+// */
+//inline void IOManager::setHandleChange(byte index, ChangeCallback fptr)
+//{
+//    this->inputs[index]->setChangeCallback(fptr);
+//}
+//
+///**
+// * Handle potentiometer
+// */
+//inline void IOManager::setHandleChangeQuantized(byte index, ChangeQuantizedCallback fptr)
+//{
+//    this->inputs[index]->setChangeQuantizedCallback(fptr);
+//}
 
 inline void IOManager::setOutputValue(byte index, unsigned int value)
 {
@@ -377,8 +429,7 @@ inline void IOManager::setOutputValue(byte index, unsigned int value)
 
 inline void IOManager::setLED(byte index, Led::Status status, unsigned int brightness = 4095)
 {
-    this->leds[index]->setTarget(brightness);
-    this->leds[index]->setStatus(status);
+    this->leds[index]->set(status, brightness);
 }
 
 /**
@@ -426,6 +477,18 @@ inline unsigned int IOManager::getAnalogMinValue()
 inline unsigned int IOManager::getAnalogMaxValue()
 {
     return (1 << this->analogResolution) - 1;
+}
+
+inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber, byte value){
+  //TODO: use the channel
+  
+    for (int i = 0; i < getInstance()->inputNumber; i++)
+    {
+        if(getInstance()->inputs[i]->getMidiControlNumber() == controlNumber){
+          int target = map(value, 0, 127, 0, 4095);
+          getInstance()->inputs[i]->setTarget(target);
+        }
+    }
 }
 
 inline void IOManager::print(){

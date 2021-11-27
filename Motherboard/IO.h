@@ -18,6 +18,8 @@ public:
     void setTarget(int target);
     unsigned int getSmoothing();
     void setSmoothing(byte smoothing);
+
+    void setName(String name);
     
 
 protected:
@@ -35,7 +37,15 @@ protected:
 
     // The smoothing factor
     float smoothing = 5;
+
+    float thresholdOnChange = 0;
+
+    String name = "";
 };
+
+inline void IO::setName(String name){
+  this->name = name;
+}
 
 inline byte IO::getIndex()
 {
@@ -64,7 +74,7 @@ inline void IO::setTarget(int target)
 
 inline unsigned int IO::getSmoothing()
 {
-    return this->smoothing;
+    return this->smoothing; 
 }
 
 inline void IO::setSmoothing(byte smoothing)
@@ -76,7 +86,7 @@ inline void IO::update(unsigned int updateMillis)
 {
     if (this->target != this->value)
     {
-        if (this->smoothing == 0)
+        if (this->smoothing == 1)
         {
             this->value = this->target;
         }
@@ -96,11 +106,11 @@ inline void IO::update(unsigned int updateMillis)
     // When value changes then call the callback.
     // Only carring about changes greater than 1.
     // This callback is defined in the Input class, and is empty in the Output class
-    if (abs(this->value - this->previousValue) > 1)
+    if (abs(this->value - this->previousValue) > this->thresholdOnChange)
     {
         this->onValueChange();
     }
-    
+
     this->previousValue = this->value;
 }
 

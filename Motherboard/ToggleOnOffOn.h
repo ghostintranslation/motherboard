@@ -16,12 +16,12 @@ inline void ToggleOnOffOn::read()
   pinMode(this->pin, INPUT);
   int val = analogRead(this->pin);
   val = map(constrain(val,8,4095), 8, 4095, 0, 4095); // TODO: ADD ANALOG MIN-MAX TO INPUT
-  if(val <= 1){
+  if(val <= 1000){
+    val = 0;
+  }else if(val > 2200){
     val = 1;
-  }else if(val > 1 && val < 100){
-    val = -1;
   }else{
-    val=0;
+    val=-1;
   }
   this->setTarget(val);
 }
@@ -37,6 +37,6 @@ inline String ToggleOnOffOn::getType()
 }
 
 // From now on "ToggleOnOffOn" will be replaced by "new ToggleOnOffOn()"
-#define ToggleOnOffOn new ToggleOnOffOn()
+#define ToggleOnOffOn MotherboardNamespace::ToggleOnOffOn
 
 #endif

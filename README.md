@@ -2,35 +2,94 @@
 
 ![GitHub version](https://img.shields.io/github/v/release/ghostintranslation/motherboard.svg?include_prereleases)
 
+**[PCBs AND MODULES AVAILABLE HERE](https://ghostintranslation.bandcamp.com/merch/)**
+
+## Features
+
+* Analog inputs (12 bits)
+* Analog outputs (12 bits)
+* Touchpads inputs (40 levels)
+* MIDI via jacks
+* MIDI via USB
+* 10 pin Eurorack power
+* USB power
+* Simple programming
+* Web editor config (coming soon)
+
 ## MOdular Teensy Hybrid Eurorack Board
 
-MOTHERBOARD is a Teensy 4.0 modular platform made to facilitate the creation of various modules ranging from synthesizers to sequencers. 
+MOTHERBOARD is a Teensy 4.0 modular platform that facilitates the creation of various modules ranging from synthesizers to sequencers. 
 
-MOTHERBOARD follows a column design of 3 inputs per column. Currently 3 physical variants exist:
-* MOTHERBOARD6: 2 columns, 6 inputs
-* MOTHERBOARD9: 3 columns, 9 inputs
-* MOTHERBOARD12: 4 columns, 12 inputs
+TODO: UPDATE THOSE PICTURES
 
-What makes it interesting is how the inputs are stacked to allow for any combination of pushbuttons, potentiometers, encoders. The footprints of those 3 types of components are stacked together so that each input can be any of those, and only one pcb can be used for many different modules. 
+It comes in 3 sizes:
+* MOTHERBOARD6: 2 columns, 6 controls, 8 inputs and 8 outputs, 8HP  
+  <img src="motherboard6.jpg" width="200px"/>
+* MOTHERBOARD12: 4 columns, 12 controls, 16 inputs and 16 outputs, 16HP  
+  <img src="motherboard9.jpg" width="200px"/>
+* MOTHERBOARD24: 8 columns, 24 controls, 32 inputs and 32 outputs, 32HP  
+  <img src="motherboard12.jpg" width="200px"/>
+
+TODO: ADD ASSEMBLED PICTURES
+
+### Vocabulary
+
+There is a distinction between controls and inputs. Controls are what is used to manipulate an input from the front panel like a potentiometer, a button or a jack. 
+
+The MOTHERBOARD is composed of 3 PCBs that get stacked one on each other.  
+A is the controls PCB, B is the main PCB, C is the optional back jacks PCB.
+
+## Modularity
+
+The MOTHERBOARD is a modular platform, not just because its intended use is modular music, but because its PCBs are designed to be modular. 
+
+On PCB A, each control slot accepts a variety of controls, and each jack can be soldered to be either an input or an output. The supported type of controls are: Potentiometer, D6 Pushbutton, MX Key, SPDT Switch, SPST switch, Rotary Encoder.
 
 <img src="input-traces.png" width="200px"/>
 
-MOTHERBOARD's physical format is following Eurorack standard, but it doesn't use CV/Gates and patch cables and has rather MIDI and audio jacks in the back. It is oriented for live performance more than experimentation.
+On PCB B, DACs may be ommitted depending on the number of outputs used, and there is the choice of through hole or SMD packages. 
 
-MOTHERBOARD comes with 2 boards, one on which the inputs and leds are soldered to (A), and one on which the Teensy and other components are soldered to (B). Both boards are attached together by multiple pin headers.
+Finally, PCB C is optional and allows to connect modules from the back to avoid the spaghetti situation. 
 
-You can get the PCBs here:<br/>
-https://ghostintranslation.bandcamp.com/merch/
+Note: An optional expander is also available to access everything on the front.
 
-<img src="motherboard6.jpg" width="200px"/> <img src="motherboard9.jpg" width="200px"/> <img src="motherboard12.jpg" width="200px"/>
+## Design rules
+
+The MOTHERBOARD follows a column design of 3 controls per column, and 4 jacks at the bottom of each column.
+
+Each input is mapped to a control and a jack in order, from left to right and top to bottom. 
+
+Each output is mapped to a jack in order, from left to right and top to bottom.
+
+TODO: IMAGE HERE
+
+## Inputs / Outputs
+
+All inputs and ouputs are accessible from the PCB C. However because of limited space on the front panels, not all inputs and outputs are accessible on the PCB A (but they are all accessible via the jacks).
+
+For instance, MOTHERBOARD6 features 2 columns, which means 6 controls and 8 jacks on the front panel. Inputs 1-6 are connected to controls and jacks 1-6. Inputs 7-8 are only connected to jacks 7-8. And Outputs 1-8 are connected to jacks 1-8.
+ 
+Remember, each jack at the bottom can be soldered as either an input or an outpout. Because there is actually only 8 jacks on the front panel but there is 8 inputs + 8 outputs, half of them won't be accesible from the front panel but could be accessed from PCB C on the back. PCB C gives access to all 8 inputs and 8 outputs. 
+
+### Inputs
+
+Inputs support 0v to 5v, however in order to work well with the range of the outputs they are programmed to read 0v to 4.096v.
+
+Inputs can be altered by the front controls as well as voltages coming from the front jacks and voltages coming from the back jacks. All 3 are connected in parallel on the corresponding input which results in the final value being the average of all incoming values.
+
+However in the case of a potentiometer in place of the control, the potentiometer will act as an attenuator of the front jack voltage when it is plugged in. When the jack is not plugged in the potentiometer acts as a regular control.
+
+TODO: TABLE OF ALL POSSIBLE INPUTS CONFIGURATIONS
+
+### Outputs
+
+Outputs are 12 bits true analog voltages provided by MCP4822 DACs. Their range is 0v to 4.095v. 
+
+Each jack on PCB A can be soldered to be either an input or an output and all outputs can be access from PCB C. It is possible to use both the front and back jack of an output to send the signal to other modules.
 
 ## Schematics
 
-Due to the use of the audio board, the available pins are very limited. Looking at the Teensy audio board page (https://www.pjrc.com/store/teensy3_audio.html) we can see only pins 0, 1, 2, 3, 4, 5, 9, 14, 16, 17, 22 are available. Also looking at Teensy pins (https://www.pjrc.com/store/teensy40.html), only 14, 16 and 17 from this subset are analog inputs.
-
-So the use of multiplexers is required to be able to read pushbuttons, potentiometers, encoders or to lit leds. In addition, a matrix design is used for the encoders to reduce the number of inputs required as each of them has 3 inputs.
-
-With this design, pin 22 will switch from input to output very fast to lit the leds and read the inputs.
+TODO
 
 ### MOTHERBOARD6
 <p>
@@ -49,46 +108,44 @@ With this design, pin 22 will switch from input to output very fast to lit the l
 
 ### Notes
 
-Dependng on the type of inputs used, not all multiplexers may be required. 
+The MIDI input is going through an optocoupler and all inputs are going through an opamp, which both isolate the incoming signals from the Teensy, that means you won't risk frying it. Though if you send more than 5v in the jacks, although there is some tolerance it will fry the opamp at some point.
 
-- IC1 = Mux for potentiometers
-- IC2 = Mux for LEDs
-- IC3 = Mux for encoders
-- IC4 = Mux for encoder's switches and pushbuttons
-- IC5 = Main mux, always required
-- IC6 = Mux for midi channel dipswitch
+The VX7805-500 is a DC-DC switching voltage regulator which converts Eurorack's 12v to 5v while not producing any heat. This part can be replaced with a LM7805 which is a linear voltage regulator, however if you do that you will need a good heatsink because it will get burning hot, and you will probably have to bend it if you wish to also use PCB C behind.
 
-A few examples:
+If you are not using Eurorack power and only using USB you can avoid soldering D1, C1, C2, the regulator and the 10 pins connector.
 
-If you only use potentiometers, you won't need IC3 and IC4. Or if you don't have any led you won't need IC2. Or if you don't want to use a dipswitch to select the midi channel, you won't need IC6.
+If you are not using MIDI you can avoid soldering D4 but you will still need the dipswitch, it provides a way to run the calibration mode in order to get the best experience.
 
 ## Bill Of Materials
 
 Here is the list of components you will need:
 
+TODO
+
 ```
-1 MOTHERBOARD6A pcb
-1 MOTHERBOARD6B pcb
+1 MOTHERBOARD PCB A
+1 MOTHERBOARD PCB B
+1 MOTHERBOARD PCB C (optional)
 1 Teensy 4.0
-1 Teensy audio board (optional)
-1 5 pins male header
-1 5 pins female headers
-5 14 pins male header
-5 14 pins female header
-2 14 pins long female header (see note)
-2 3.5mm jack connectors
-1 Resistor ~ 22ohm
+1 Teensy audio board Rev D (optional)
+2 14 pins female headers
+x female round pins headers or DIP 16 and DIP8 IC sockets
+x male header
+x 2 rows long female header 
+4 2N4007 diodes
 1 4 positions dipswitch (optional)
-x CD4051 multiplexers
-x DIP16 IC sockets (optional)
+x CD4051 chips
+x CD4053 chips
+x 74HC596 chips
+x MCP4822 chips
+x 3.5mm TR jack connectors
 x LEDs
 x Vertical linear 10k potentiometers
 x Vertical rotary encoders
 x D6 pushbuttons
 ```
 
-Note: long female headers are used to stack the audio board to Teensy and connect Teensy to the MOTHERBOARD
-
+TODO: Update this list
 Here is a list of useful links to get these parts: https://github.com/ghostintranslation/parts
 
 ## Teensy
@@ -101,10 +158,6 @@ https://www.pjrc.com/teensy/teensyduino.html
 2. In the Tools -> USB Type menu, choose `Serial + midi`.
 3. Plug the Teensy to your computer with a micro USB cable. (It's ok if the Teensy is on the module)
 4. Then just click the arrow button to upload the code
-
-## MIDI
-
-The MIDI input and output jacks are directly connected to the Teensy serial input and output. That means there is no protection against voltage or current. It is primarily ment to connect 2 of these modules, or 2 Teensy together. If you want to connect something else to it make sure to provide a maximum of `3.3v` and `250mA`.
 
 ## How to use
 

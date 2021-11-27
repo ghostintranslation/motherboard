@@ -15,5 +15,5 @@ inline String CvOut::getType()
 }
 
 // From now on "CvOut" will be replaced by "new CvOut()"
-#define CvOut new MotherboardNamespace::CvOut()
+#define CvOut MotherboardNamespace::CvOut
 #endif
