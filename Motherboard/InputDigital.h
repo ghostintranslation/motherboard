@@ -7,7 +7,7 @@
 //{
 //public:
 //    void read() override;
-//    bool needsGround() override;
+//
 //    String getType() override;
 //
 //protected:
@@ -119,10 +119,6 @@
 //    this->value = newReading;
 //}
 //
-//inline bool InputDigital::needsGround()
-//{
-//    return false;
-//}
 //
 ///**
 // * Set the press down callback

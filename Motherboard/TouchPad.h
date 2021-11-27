@@ -7,7 +7,7 @@ class TouchPad : public Input
 {
 public:
   void read() override;
-  bool needsGround() override;
+  bool isDirectToTeensy() override {return true;}
   String getType() override;
   void onValueChange() override;
 //  void setSensitivity(int sensitivity);
@@ -46,11 +46,6 @@ inline void TouchPad::read()
   val = map(constrain(val, this->lowValue, this->highValue), this->lowValue, this->highValue, 0, 4095);// TODO: ADD ANALOG MIN-MAX TO INPUT
 
   this->setTarget(val);
-}
-
-inline bool TouchPad::needsGround()
-{
-  return false;
 }
 
 inline String TouchPad::getType()

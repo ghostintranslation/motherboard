@@ -7,7 +7,7 @@ class CvIn : public InputAnalog
 {
 public:
   void read() override;
-  bool needsGround() override;
+
   String getType() override;
   
   // On value change callback
@@ -95,11 +95,6 @@ inline void CvIn::onValueChange(){
 
 inline void CvIn::setMaxVoltage(byte maxVoltage){
   this->maxVoltage = maxVoltage;
-}
-
-inline bool CvIn::needsGround()
-{
-  return true;
 }
 
 inline String CvIn::getType()

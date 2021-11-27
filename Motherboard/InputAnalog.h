@@ -7,7 +7,7 @@ class InputAnalog : public Input
 {
 public:
     void read() override;
-    bool needsGround() override;
+
     String getType() override;
     
     // On value change callback
@@ -32,11 +32,6 @@ inline void InputAnalog::read()
 //  val = map(constrain(val, 160, 4095), 160, 4095, 0, 4095); // TODO: ADD ANALOG MIN-MAX TO INPUT
 
   this->setTarget(val);
-}
-
-inline bool InputAnalog::needsGround()
-{
-  return true;
 }
 
 inline void InputAnalog::setOnChangeInRange(unsigned int rangeLow, unsigned int rangeHigh, ChangeCallback ftpr){

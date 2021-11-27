@@ -173,23 +173,23 @@ void onChangePot1(byte inputIndex, float value, float diffToPrevious){
 //  Serial.print(" ");
 //  Serial.println(quantizedValue);
 
-  float mapped = map(value,0,4095,0,1000);
-  waveform1.frequency(mapped);
+//  float mapped = map(value,0,4095,0,1000);
+//  waveform1.frequency(mapped);
   Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, value);
 }
 
 void onChangePot2(byte inputIndex, float value, float diffToPrevious){
-  waveform1.amplitude(map(value,0,4095,0,0.05));
+//  waveform1.amplitude(map(value,0,4095,0,0.05));
 }
 void onChangePot3(byte inputIndex, float value, float diffToPrevious){
-  float mapped = map(value,0,4095,0,1000);
-  waveform2.frequency(mapped);
+//  float mapped = map(value,0,4095,0,1000);
+//  waveform2.frequency(mapped);
   Motherboard.setLED(1, MotherboardNamespace::Led::Status::On, value);
 }
 void onChangePot4(byte inputIndex, float value, float diffToPrevious){
-  float mapped = map(value,0,4095,0,0.05);
-  Serial.println(mapped);
-  waveform2.amplitude(mapped);
+//  float mapped = map(value,0,4095,0,0.05);
+//  Serial.println(mapped);
+//  waveform2.amplitude(mapped);
 }
 
 void onVelocityChange(byte inputIndex, float value, float diffToPrevious){

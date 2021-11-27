@@ -7,7 +7,7 @@ class RotaryEncoder : public Input
 {
 public:
   void read() override;
-  bool needsGround() override;
+
   String getType() override;
   
   bool isPressed();
@@ -40,11 +40,6 @@ inline void RotaryEncoder::read()
     this->pressed = 1;
   }
 
-}
-
-inline bool RotaryEncoder::needsGround()
-{
-  return false;
 }
 
 inline String RotaryEncoder::getType()

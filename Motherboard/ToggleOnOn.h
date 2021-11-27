@@ -7,7 +7,7 @@ class ToggleOnOn : public Input
 {
 public:
   void read() override;
-  bool needsGround() override;
+  
   String getType() override;
 };
 
@@ -22,11 +22,6 @@ inline void ToggleOnOn::read()
     val = 0;
   }
   this->setTarget(val);
-}
-
-inline bool ToggleOnOn::needsGround()
-{
-  return false;
 }
 
 inline String ToggleOnOn::getType()

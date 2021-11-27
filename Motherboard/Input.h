@@ -10,7 +10,7 @@ public:
     virtual void read() = 0;
 
     // Depending on the type of input, it will need to be connected to ground or not
-    virtual bool needsGround() = 0;
+    virtual bool isDirectToTeensy(){return false;}
     
     void setPin(byte pin);
 
@@ -54,7 +54,7 @@ protected:
     elapsedMillis debounceTime;
     unsigned int debounceDelay = 100;
 
-    int midiControlNumber = -1;;
+    int midiControlNumber = -1;
 };
 
 /**

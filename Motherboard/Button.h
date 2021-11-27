@@ -7,7 +7,7 @@ class Button : public Input
 {
 public:
     void read() override;
-    bool needsGround() override;
+
     String getType() override;
     
     // On value change callback
@@ -60,11 +60,6 @@ inline void Button::read()
     // In the case of a digital input, there is no in-between values, so the target and the actual value are equal
     this->target = newReading;
     this->value = newReading;
-}
-
-inline bool Button::needsGround()
-{
-    return true;
 }
 
 inline String Button::getType()

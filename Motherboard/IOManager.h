@@ -258,15 +258,7 @@ inline void IOManager::readWriteIO()
 
     // Preparing the shift register data
     unsigned long shiftRegistersData;
-//    if (this->inputs[this->currentInputIndex]->needsGround())
-//    {
-//        shiftRegistersData = 0x80;
-//    }
-//    else
-//    {
-//        shiftRegistersData = 0x00;
-//    }
-    if (this->inputs[this->currentInputIndex]->getType() == "TouchPad")
+    if (this->inputs[this->currentInputIndex]->isDirectToTeensy())
     {
         shiftRegistersData = 0x80;
     }
