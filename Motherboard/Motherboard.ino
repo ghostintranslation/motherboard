@@ -24,15 +24,15 @@ https://github.com/ghostintranslation
 #include "Motherboard.h"
 
 AudioOutputI2S           i2s1; 
-//APotentiometer pot1(0, "pot1");
-//APotentiometer pot2(1, "pot2");
-//APotentiometer pot3(2, "pot3");
-//APotentiometer pot4(3, "pot4");
-//APotentiometer pot5(4, "pot5");
-//APotentiometer pot6(5, "pot6");
-//ADac dac1(0, "dac1");
-//ALed led1(0);
-//ALed led2(1);
+//InputPotentiometer pot1(0, "pot1");
+//InputPotentiometer pot2(1, "pot2");
+//InputPotentiometer pot3(2, "pot3");
+//InputPotentiometer pot4(3, "pot4");
+//InputPotentiometer pot5(4, "pot5");
+//InputPotentiometer pot6(5, "pot6");
+//OutputDac dac1(0, "dac1");
+//Led led1(0);
+//Led led2(1);
 //AudioSynthWaveformModulated sine;
 //AudioMixer4 mixer;
 //AudioConnection     patchCord1(pot1, 0, mixer, 0);
@@ -88,21 +88,21 @@ void setup()
   sine->frequency(0.5);
   sine->amplitude(0.1);
   
-  ALed* led1 = new ALed(0);
+  Led* led1 = new Led(0);
 //  led1->setOnGateOpen(onGateOpen);
 //  led1->setOnGateClose(onGateClose);
 
-  ALed* led2 = new ALed(1);
-//  led2->setStatus(ALed::Status::BlinkFast);
+  Led* led2 = new Led(1);
+//  led2->setStatus(Led::Status::BlinkFast);
 
-  ADac* dac1 = new ADac(0, "dac1");
+  OutputDac* dac1 = new OutputDac(0, "dac1");
 //  dac1->setOnChange(onChangePot2);
   
-  APotentiometer* pot1 = new APotentiometer(0, "pot1");
+  InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
 //  pot1->setOnGateOpen(onGateOpen);
 //  pot1->setOnGateClose(onGateClose);
 
-  APotentiometer* pot2 = new APotentiometer(1, "pot2");
+  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
   pot2->setOnChange(onChangePot2);
 //  pot2->setOnGateOpen(onGateOpen);
 //  pot2->setOnGateClose(onGateClose);
@@ -132,8 +132,8 @@ void setup()
 
 
    
-//  pot1 = new APotentiometer(0, "pot1");
-//  pot2 = new APotentiometer(1, "pot2");
+//  pot1 = new InputPotentiometer(0, "pot1");
+//  pot2 = new InputPotentiometer(1, "pot2");
 //  pot1->setOnChange(onChangePot1);
   
 //  Potentiometer* pot0 = new Potentiometer(0, "pot0");

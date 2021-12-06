@@ -1,22 +1,22 @@
-#ifndef APotentiometer_h
-#define APotentiometer_h
+#ifndef InputPotentiometer_h
+#define InputPotentiometer_h
 
-#include "APhysicalInput.h"
+#include "PhysicalInput.h"
 
-class APotentiometer : public APhysicalInput
+class InputPotentiometer : public PhysicalInput
 {
 public:
-  using APhysicalInput::APhysicalInput;
+  using PhysicalInput::PhysicalInput;
   
   bool isDirectToTeensy() {return false;}
     
   void read() override;
 
 protected:
-  String type = "APotentiometer";
+  String type = "InputPotentiometer";
 };
 
-inline void APotentiometer::read()
+inline void InputPotentiometer::read()
 {
   pinMode(this->pin, INPUT);
   float val = analogRead(this->pin);
@@ -26,6 +26,6 @@ inline void APotentiometer::read()
 }
 
 // Prevents to have to write the namespace when using this class
-#define APotentiometer MotherboardNamespace::APotentiometer
+#define InputPotentiometer MotherboardNamespace::InputPotentiometer
 
 #endif

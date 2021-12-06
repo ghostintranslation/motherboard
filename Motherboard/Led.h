@@ -1,9 +1,9 @@
-#ifndef Aled_h
-#define Aled_h
+#ifndef Led_h
+#define Led_h
 
-#include "APhysicalOutput.h"
+#include "PhysicalOutput.h"
 
-class ALed : public APhysicalIO
+class Led : public PhysicalIO
 {
 
 public:
@@ -15,10 +15,8 @@ public:
     BlinkFast,
     BlinkOnce
   };
-
-//  using APhysicalOutput::APhysicalOutput;
   
-  ALed(int index);
+  Led(int index);
 
   void print() override;
 
@@ -37,14 +35,14 @@ private:
   elapsedMillis blinkTime;
 
 protected:
-  String type = "ALed";
+  String type = "Led";
 };
 
-inline ALed::ALed(int index):APhysicalIO{index, (String)"ALed" + index}{
-  AIO::registerLed(this);
+inline Led::Led(int index):PhysicalIO{index, (String)"Led" + index}{
+  IO::registerLed(this);
 }
 
-inline void ALed::set(Status status, int brightness)
+inline void Led::set(Status status, int brightness)
 {
   this->status = status;
   this->requestedTarget = brightness;
@@ -62,13 +60,13 @@ inline void ALed::set(Status status, int brightness)
   }
 }
 
-inline void ALed::setStatus(Status status){
+inline void Led::setStatus(Status status){
   this->status = status;
 }
 
-inline void ALed::update()
+inline void Led::update()
 {
-  APhysicalIO::update();
+  PhysicalIO::update();
 
   switch (this->status)
   {
@@ -107,16 +105,16 @@ inline void ALed::update()
   }
 }
 
-inline void ALed::setTarget(float target)
+inline void Led::setTarget(float target)
 {
     this->requestedTarget = target;
 }
 
 
-inline void ALed::print()
+inline void Led::print()
 {
   Serial.printf("%07.2f", this->value);
 }
 
-#define ALed MotherboardNamespace::ALed
+#define Led MotherboardNamespace::Led
 #endif

@@ -1,17 +1,17 @@
-#ifndef AIO_h
-#define AIO_h
+#ifndef IO_h
+#define IO_h
 
 #include "AudioStream.h"
 
 // Forward declarations
-class APhysicalInput;
-class APhysicalOutput;
-class ALed;
+class PhysicalInput;
+class PhysicalOutput;
+class Led;
 
-class AIO : public AudioStream
+class IO : public AudioStream
 {
 public:
-        AIO(String name);
+        IO(String name);
         
         virtual void update(void);
 
@@ -34,12 +34,12 @@ public:
     virtual void print();
         
     // Registrar
-    static void registerInput(APhysicalInput* input);
-    static void registerOutput(APhysicalOutput* output);
-    static void registerLed(ALed* led);
-    static APhysicalInput** getInputs();
-    static APhysicalOutput** getOutputs();
-    static ALed** getLeds();
+    static void registerInput(PhysicalInput* input);
+    static void registerOutput(PhysicalOutput* output);
+    static void registerLed(Led* led);
+    static PhysicalInput** getInputs();
+    static PhysicalOutput** getOutputs();
+    static Led** getLeds();
     static unsigned int inputsSize;
     static unsigned int outputsSize;
     static unsigned int ledsSize;
@@ -47,11 +47,11 @@ public:
 private:
     audio_block_t *inputQueueArray[1];
         
-    static APhysicalInput** inputs;
+    static PhysicalInput** inputs;
     
-    static APhysicalOutput** outputs;
+    static PhysicalOutput** outputs;
     
-    static ALed** leds;
+    static Led** leds;
         
 protected:      
         String name = "";
@@ -92,17 +92,17 @@ protected:
 
 
 // Must initialize
-unsigned int AIO::inputsSize = 0;
-APhysicalInput** AIO::inputs = new APhysicalInput*[0];
+unsigned int IO::inputsSize = 0;
+PhysicalInput** IO::inputs = new PhysicalInput*[0];
     
-unsigned int AIO::outputsSize = 0;
-APhysicalOutput** AIO::outputs = new APhysicalOutput*[0];
+unsigned int IO::outputsSize = 0;
+PhysicalOutput** IO::outputs = new PhysicalOutput*[0];
     
-unsigned int AIO::ledsSize = 0;
-ALed** AIO::leds = new ALed*[0];
+unsigned int IO::ledsSize = 0;
+Led** IO::leds = new Led*[0];
 
 
-inline AIO::AIO(String name) : AudioStream(1, inputQueueArray)
+inline IO::IO(String name) : AudioStream(1, inputQueueArray)
 {
   this->name = name;
 
@@ -111,32 +111,32 @@ inline AIO::AIO(String name) : AudioStream(1, inputQueueArray)
   this->active = true;
 }
 
-inline String AIO::getName()
+inline String IO::getName()
 {
     return this->name;
 }
 
-inline String AIO::getType()
+inline String IO::getType()
 {
     return this->type;
 }
 
-inline float AIO::getValue()
+inline float IO::getValue()
 {
     return this->value;
 }
 
-inline float AIO::getTarget()
+inline float IO::getTarget()
 {
     return this->target;
 }
 
-inline void AIO::setTarget(float target)
+inline void IO::setTarget(float target)
 {
     this->target = target;
 }
 
-inline void AIO::update()
+inline void IO::update()
 { 
     // Set the target from the input
     audio_block_t *block;
@@ -200,7 +200,7 @@ inline void AIO::update()
     }
 }
 
-inline void AIO::onValueChange(){
+inline void IO::onValueChange(){
   if (this->changeCallback != nullptr)
   {
     this->changeCallback(this->name, this->value, this->value - this->previousValue);
@@ -229,7 +229,7 @@ inline void AIO::onValueChange(){
 /**
  * Set the callback function to call when the value changes
  */
-inline void AIO::setOnChange(ChangeCallback changeCallback)
+inline void IO::setOnChange(ChangeCallback changeCallback)
 {
     this->changeCallback = changeCallback;
 }
@@ -237,7 +237,7 @@ inline void AIO::setOnChange(ChangeCallback changeCallback)
 /**
  * 
  */
-inline void AIO::setOnGateOpen(EdgeCallback gateOpenCallback)
+inline void IO::setOnGateOpen(EdgeCallback gateOpenCallback)
 {
     this->gateOpenCallback = gateOpenCallback;
 }
@@ -245,13 +245,13 @@ inline void AIO::setOnGateOpen(EdgeCallback gateOpenCallback)
 /**
  * 
  */
-inline void AIO::setOnGateClose(EdgeCallback gateCloseCallback)
+inline void IO::setOnGateClose(EdgeCallback gateCloseCallback)
 {
     this->gateCloseCallback = gateCloseCallback;
 }
 
-inline void AIO::registerInput(APhysicalInput* input){
-  APhysicalInput** newArr = new APhysicalInput*[inputsSize + 1];
+inline void IO::registerInput(PhysicalInput* input){
+  PhysicalInput** newArr = new PhysicalInput*[inputsSize + 1];
   std::copy(inputs, inputs + std::min(inputsSize, inputsSize + 1), newArr); // TODO: Not sure if this is better than the loop
 //  for (int i = 0; i < inputsSize; i++)
 //  {
@@ -265,8 +265,8 @@ inline void AIO::registerInput(APhysicalInput* input){
   inputsSize++;
 }
 
-inline void AIO::registerOutput(APhysicalOutput* output){
-  APhysicalOutput** newArr = new APhysicalOutput*[outputsSize + 1];
+inline void IO::registerOutput(PhysicalOutput* output){
+  PhysicalOutput** newArr = new PhysicalOutput*[outputsSize + 1];
   std::copy(outputs, outputs + std::min(outputsSize, outputsSize + 1), newArr);
   delete[] outputs;
   outputs = newArr;
@@ -276,8 +276,8 @@ inline void AIO::registerOutput(APhysicalOutput* output){
   outputsSize++; 
 }
 
-inline void AIO::registerLed(ALed* led){
-  ALed** newArr = new ALed*[ledsSize + 1];
+inline void IO::registerLed(Led* led){
+  Led** newArr = new Led*[ledsSize + 1];
   std::copy(leds, leds + std::min(ledsSize, ledsSize + 1), newArr);
   delete[] leds;
   leds = newArr;
@@ -287,25 +287,25 @@ inline void AIO::registerLed(ALed* led){
   ledsSize++; 
 }
 
-inline APhysicalInput** AIO::getInputs(){
+inline PhysicalInput** IO::getInputs(){
   return inputs;
 };
 
-inline APhysicalOutput** AIO::getOutputs(){
+inline PhysicalOutput** IO::getOutputs(){
   return outputs;
 };
 
-inline ALed** AIO::getLeds(){
+inline Led** IO::getLeds(){
   return leds;
 };
 
-inline void AIO::print()
+inline void IO::print()
 {
   Serial.print(this->name);
   Serial.print(": ");
   Serial.printf("%07.2f", this->value);
 }
 
-//#define AIO MotherboardNamespace::AIO
+//#define IO MotherboardNamespace::IO
 
 #endif
