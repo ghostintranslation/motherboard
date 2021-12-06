@@ -6,6 +6,10 @@
 class InputAnalog : public Input
 {
 public:
+    using Input::Input;
+    
+    bool isDirectToTeensy() {Serial.println("InputAnalog");return false;}
+
     void read() override;
 
     String getType() override;
@@ -22,7 +26,7 @@ private:
     unsigned int previousValueQuantized = 0;
     
     // Callbacks functions
-    ChangeQuantizedCallback changeQuantizedCallback;
+    ChangeQuantizedCallback changeQuantizedCallback = nullptr;
 };
 
 inline void InputAnalog::read()

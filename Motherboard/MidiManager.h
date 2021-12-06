@@ -58,12 +58,13 @@ private:
     byte midiChannel;
 
     // Callbacks
-    MidiNoteOnCallback midiNoteOnCallback;
-    MidiNoteOffCallback midiNoteOffCallback;
-    GlobalMidiControlChangeCallback globalMidiControlChangeCallback;
-    MidiSysExCallback midiSysExCallback;
-//    std::vector<MidiControlChangeCallback> midiControlChangeCallbacks;
-//std::map<{int,int}, std::vector<MidiControlChangeCallbackFunction>> midiControlChangeCallbacks;
+    MidiNoteOnCallback midiNoteOnCallback = nullptr;
+    MidiNoteOffCallback midiNoteOffCallback = nullptr;
+    GlobalMidiControlChangeCallback globalMidiControlChangeCallback = nullptr;
+    MidiSysExCallback midiSysExCallback = nullptr;
+    // Storing the MIDI CC callbacks in a map with keys pairs representing the MIDI channel and MIDI control number
+    // Using a vector as value allows to store multiple callbacks per key, alternatively could be done with a multimap
+    std::map<std::pair<int,int>, std::vector<MidiControlChangeCallbackFunction>> midiControlChangeCallbacks;
     MidiControlChangeCallback *getMidiControlChangeCallback(String name);
       
     // Handle MIDI
@@ -350,7 +351,7 @@ inline MidiManager::MidiControlChangeCallback *MidiManager::getMidiControlChange
 //    }
 //  }
 //
-//  return nullptr;
+  return nullptr;
 }
 
 

@@ -6,6 +6,10 @@
 class Potentiometer : public InputAnalog
 {
 public:
+  using InputAnalog::InputAnalog;
+  
+  bool isDirectToTeensy() {return false;}
+    
   void read() override;
   String getType() override;
 };
@@ -19,6 +23,7 @@ inline void Potentiometer::read()
 {
   pinMode(this->pin, INPUT);
   int val = analogRead(this->pin);
+//  Serial.println(val);
   val = map(constrain(val, 331, 4095), 331, 4095, 0, 4095); // TODO: ADD ANALOG MIN-MAX TO INPUT
 
   this->setTarget(val);

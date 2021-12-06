@@ -7,7 +7,7 @@ class TouchPad : public Input
 {
 public:
   void read() override;
-  bool isDirectToTeensy() override {return true;}
+  bool isDirectToTeensy() override {Serial.println("TouchPad");return true;}
   String getType() override;
   void onValueChange() override;
 //  void setSensitivity(int sensitivity);

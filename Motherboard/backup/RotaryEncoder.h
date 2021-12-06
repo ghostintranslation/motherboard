@@ -6,6 +6,7 @@
 class RotaryEncoder : public Input
 {
 public:
+  bool isDirectToTeensy() override {Serial.println("RotaryEncoder");return false;}
   void read() override;
 
   String getType() override;

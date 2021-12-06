@@ -1,8 +1,16 @@
 #ifndef io_h
 #define io_h
+
+#include <vector>
+
+class Input;
+class Output;
+
 class IO
 {
 public:
+    IO(String name);
+    
     virtual void onValueChange() {}
 
     virtual String getType() = 0;
@@ -11,21 +19,24 @@ public:
     virtual void print();
     
     void update(unsigned int updateMillis);
-    byte getIndex();
-    void setIndex(byte index);
+
     float getValue();
     int getTarget();
     void setTarget(int target);
     unsigned int getSmoothing();
     void setSmoothing(byte smoothing);
 
-    void setName(String name);
-    
+    // Registrar
+    static void registerInput(Input* input);
+    static void registerOutput(Output* output);
+    static std::vector<Input*> getInputs();
+    static std::vector<Output*> getOutputs();
+
+private:
+    static std::vector<Input*> inputs;
+    static std::vector<Output*> outputs;
 
 protected:
-    // The index starting at 0
-    byte index = 0;
-
     // The previous value
     float previousValue = 0;
 
@@ -43,18 +54,12 @@ protected:
     String name = "";
 };
 
-inline void IO::setName(String name){
+// Must initialize
+std::vector<Input*> IO::inputs = std::vector<Input*>{};
+std::vector<Output*> IO::outputs = std::vector<Output*>{};
+
+inline IO::IO(String name){
   this->name = name;
-}
-
-inline byte IO::getIndex()
-{
-    return this->index;
-}
-
-inline void IO::setIndex(byte index)
-{
-    this->index = index;
 }
 
 inline float IO::getValue()
@@ -114,9 +119,28 @@ inline void IO::update(unsigned int updateMillis)
     this->previousValue = this->value;
 }
 
+inline void IO::registerInput(Input* input){
+  inputs.push_back(input);
+}
+
+inline void IO::registerOutput(Output* output){
+  outputs.push_back(output);
+}
+
+inline std::vector<Input*> IO::getInputs(){
+  return inputs;
+};
+
+inline std::vector<Output*> IO::getOutputs(){
+  return outputs;
+};
+
+
 inline void IO::print()
 {
-    Serial.print(this->value);
+  Serial.print(this->name);
+  Serial.print(": ");
+  Serial.print(this->value);
 }
 
 #endif

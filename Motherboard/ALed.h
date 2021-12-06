@@ -1,9 +1,9 @@
-#ifndef led_h
-#define led_h
+#ifndef Aled_h
+#define Aled_h
 
-#include "Output.h"
+#include "APhysicalOutput.h"
 
-class Led : public Output
+class ALed : public APhysicalOutput
 {
 
 public:
@@ -16,22 +16,32 @@ public:
     BlinkOnce
   };
 
+//  using APhysicalOutput::APhysicalOutput;
+  
+  ALed(int index);
+
   String getType() override;
+
+  void print() override;
 
   void update(unsigned int updateMillis);
   void set(Status status, int brightness);
 
 private:
-  Status status;
+  Status status = Off;
 
   // The value target requested
-  unsigned int requestedTarget;
+  unsigned int requestedTarget = 0;
 
   // Time counter for the blinking
   elapsedMillis blinkTime;
 };
 
-inline void Led::set(Status status, int brightness)
+inline ALed::ALed(int index):APhysicalOutput{index, "ALed"}{
+  this->index = index;
+}
+
+inline void ALed::set(Status status, int brightness)
 {
   this->status = status;
   this->requestedTarget = brightness;
@@ -49,9 +59,9 @@ inline void Led::set(Status status, int brightness)
   }
 }
 
-inline void Led::update(unsigned int updateMillis)
+inline void ALed::update(unsigned int updateMillis)
 {
-  Output::update(updateMillis);
+  APhysicalOutput::update();
 
   switch (this->status)
   {
@@ -90,8 +100,15 @@ inline void Led::update(unsigned int updateMillis)
   }
 }
 
-inline String Led::getType()
+inline String ALed::getType()
 {
-  return "Led";
+  return "ALed";
 }
+
+inline void ALed::print()
+{
+  Serial.printf("%07.2f", this->value);
+}
+
+#define ALed MotherboardNamespace::ALed
 #endif

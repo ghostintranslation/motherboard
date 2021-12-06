@@ -6,6 +6,7 @@
 class CvIn : public InputAnalog
 {
 public:
+  bool isDirectToTeensy() override {Serial.println("CvIn");return false;}
   void read() override;
 
   String getType() override;

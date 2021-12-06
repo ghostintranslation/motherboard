@@ -1,19 +1,19 @@
 #ifndef Input_h
 #define Input_h
 
-#include "IO.h"
+#include "PhysicalIO.h"
 
-class Input : public IO
+class Input : public PhysicalIO
 {
 public:
+    Input(int index, String name);
+    
     // Depending on the type of input, the way to read it will difer
     virtual void read() = 0;
 
-    // Depending on the type of input, it will need to be connected to ground or not
-    virtual bool isDirectToTeensy(){return false;}
-    
-    void setPin(byte pin);
-
+    // Depending on the type of input, it could need to connect directly to Teensy
+    // skipping the opamp and resistor divider, like the TouchPads
+    virtual bool isDirectToTeensy() = 0;
     
     void setAnalogMinValue(unsigned int analogMinValue);
     
@@ -45,17 +45,23 @@ protected:
     unsigned int analogMinValue = 0;
 
     // Change callback function
-    ChangeCallback changeCallback;
+    ChangeCallback changeCallback = nullptr;
 
-    EdgeCallback gateOpenCallback;
+    EdgeCallback gateOpenCallback = nullptr;
 
-    EdgeCallback gateCloseCallback;
+    EdgeCallback gateCloseCallback = nullptr;
     
     elapsedMillis debounceTime;
     unsigned int debounceDelay = 100;
 
     int midiControlNumber = -1;
 };
+
+inline Input::Input(int index, String name):PhysicalIO{index, name}
+{
+  this->pin = ANALOG_IN_1_PIN; // TODO: DO IT ACCORDING TO INDEX
+  IO::registerInput(this);
+}
 
 /**
  * On value change call the callback.
@@ -121,13 +127,7 @@ inline void Input::setOnGateClose(EdgeCallback gateCloseCallback)
     this->gateCloseCallback = gateCloseCallback;
 }
 
-inline void Input::setPin(byte pin)
-{
-    this->pin = pin;
-}
-
-
-inline static void Input::onMidiControlChange(byte channel, byte controlNumber, byte value){
+inline void Input::onMidiControlChange(byte channel, byte controlNumber, byte value){
 //    int target = map(value, 0,127, 0, 4095);
 //    setTarget(target);
 }

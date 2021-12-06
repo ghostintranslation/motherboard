@@ -6,6 +6,7 @@
 class ToggleOnOffOn : public Input
 {
 public:
+  bool isDirectToTeensy() override {Serial.println("ToggleOnOffOn");return false;}
   void read() override;
 
   String getType() override;

@@ -20,18 +20,37 @@ https://github.com/ghostintranslation
  * This is an example sketch
  */
 
-//#include <Audio.h>
+#include <Audio.h>
 #include "Motherboard.h"
 
-CvOut* out;
-CvOut* out2;
-CvOut* out3;
-CvOut* out4;
-CvOut* out5;
-CvOut* out6;
-CvOut* out7;
-CvOut* out8;
+AudioOutputI2S           i2s1; 
+//APotentiometer pot1(0, "pot1");
+//APotentiometer pot2(1, "pot2");
+//APotentiometer pot3(2, "pot3");
+//APotentiometer pot4(3, "pot4");
+//APotentiometer pot5(4, "pot5");
+//APotentiometer pot6(5, "pot6");
+//ADac dac1(0, "dac1");
+//ALed led1(0);
+//ALed led2(1);
+//AudioSynthWaveformModulated sine;
+//AudioMixer4 mixer;
+//AudioConnection     patchCord1(pot1, 0, mixer, 0);
+//AudioConnection     patchCord2(pot2, 0, mixer, 1);
+//AudioConnection     patchCord3(pot3, 0, mixer, 2);
+//AudioConnection     patchCord4(pot4, 0, mixer, 3);
+//AudioConnection     patchCord5(mixer, 0, dac1, 0);
+//AudioConnection     patchCord6(mixer, 0, led1, 0);
+//AudioConnection     patchCord7(sine, 0, led2, 0);
 
+//AudioSynthWaveformModulated sine;
+//AudioConnection     patchCord1(pot1, 0, amp, 0);
+//AudioConnection     patchCord2(amp, 0, sine, 0);
+//AudioConnection     patchCord3(pot2, 0, sine, 1);
+//AudioConnection     patchCord3(sine, 0, dac1, 0);
+//AudioConnection     patchCord4(sine, 0, i2s1, 0);
+//AudioConnection     patchCord5(sine, 0, i2s1, 1);
+//AudioControlSGTL5000     audioboard;
 
 //AudioSynthWaveform       waveform1;      //xy=171,84
 //AudioSynthWaveform       waveform2;      //xy=178,148
@@ -39,7 +58,7 @@ CvOut* out8;
 //AudioConnection          patchCord1(waveform1, 0, i2s1, 0);
 //AudioConnection          patchCord2(waveform2, 0, i2s1, 1);
 //AudioControlSGTL5000     audioboard;     //xy=239,232
-
+AudioSynthWaveformModulated* sine;
 void setup()
 {
   Serial.begin(115200);
@@ -49,32 +68,110 @@ void setup()
 
    // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
-//  AudioMemory(20);
+  AudioMemory(10);
 
   // Comment these out if not using the audio adaptor board.
   // This may wait forever if the SDA & SCL pins lack
   // pullup resistors
 //  audioboard.enable();
-//  audioboard.volume(0.5); // caution: very loud - use oscilloscope only!
+//  audioboard.volume(0.05); // caution: very loud - use oscilloscope only!
   
 //  TouchPad* pad1 = new TouchPad();
 //  TouchPad* pad2 = new TouchPad();
 //  TouchPad* pad3 = new TouchPad();
 
 //Button* but1 = new Button();
+
   
-  Potentiometer* pot1 = new Potentiometer();
-  pot1->setOnChange(onChangePot1);
-  Potentiometer* pot2 = new Potentiometer();
-  pot2->setOnChange(onChangePot2);
-  Potentiometer* pot3 = new Potentiometer();
-  pot3->setOnChange(onChangePot3);
-  Potentiometer* pot4 = new Potentiometer();
-  pot4->setOnChange(onChangePot4);
-  Potentiometer* pot5 = new Potentiometer();
-  Potentiometer* pot6 = new Potentiometer();
-  Potentiometer* pot7 = new Potentiometer();
-  Potentiometer* pot8 = new Potentiometer();
+  sine = new AudioSynthWaveformModulated();
+  sine->begin(WAVEFORM_SINE);
+  sine->frequency(0.5);
+  sine->amplitude(0.1);
+  
+  ALed* led1 = new ALed(0);
+//  led1->setOnChange(onChangePot2);
+
+  ALed* led2 = new ALed(1);
+
+  ADac* dac1 = new ADac(0, "dac1");
+//  dac1->setOnChange(onChangePot2);
+  
+  APotentiometer* pot1 = new APotentiometer(0, "pot1");
+//  pot1->setOnChange(onChangePot2);
+
+  APotentiometer* pot2 = new APotentiometer(1, "pot2");
+  pot1->setOnChange(onChangePot2);
+
+  AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *dac1, 0);
+  AudioConnection* patchCord2 = new AudioConnection(*sine, 0, *led1, 0);
+  AudioConnection* patchCord3 = new AudioConnection(*pot2, 0, *led2, 0);
+
+
+
+  // SOLUTION 1
+//  Potentiometer* pot1 = new Potentiometer("paramName1");
+//  pot1->setMidi(1, 20);
+//  pot1->setOnChange(onChangePot1);
+//  
+//  MidiInput* midiIn1 = new MidiInput("paramName2", 1, 21);
+//  midiIn1->setOnChange(onChangeMidiIn1);
+
+  // SOLUTION 2
+//  b1 = new Block("b1");
+//  b2 = new Block("b2");
+//  b3 = new Block("b3");
+//  b1->addOutput(b2);
+//  b1->addOutput(b3);
+//  b2->addInput(b1);
+//  b3->addInput(b1);
+
+
+   
+//  pot1 = new APotentiometer(0, "pot1");
+//  pot2 = new APotentiometer(1, "pot2");
+//  pot1->setOnChange(onChangePot1);
+  
+//  Potentiometer* pot0 = new Potentiometer(0, "pot0");
+//  pot0->setOnChange(onChangePot0);
+  
+//  Potentiometer* pot1 = new Potentiometer(1, "pot1");
+
+//  Potentiometer* pot2 = new Potentiometer(2, "pot2");
+  
+//  VirtualInput* virtualInput1 = new VirtualInput(); // Virtual inputs allow to benefits from smoothing and interract in a multiple inputs parameter
+//  virtualInput1->setValue(10);
+//  
+//  Parameter* param0 = new Parameter("param0");
+//  param0->setMidi(1, 21);
+//  param0->addInput(pot0);
+//  param0->setOnChange(onChangeParam1);
+//  
+//  Parameter* param2 = new Parameter("param2");
+//  param2->setMidi(1, 21);
+//  param2->addInput(pot2);
+//  param2->setOnChange(onChangeParam2);
+//  
+//  Parameter* param1 = new Parameter("param1");
+//  param1->setMidi(1, 25); // MIDI would override the value
+//  param1->setValue(10); // This would override the value
+//  param1->addInput(pot0);
+//  param1->addInput(virtualInput1);
+//  param1->setOnChange(onChangeParam1);
+//  param1->setInputsRelation("SUM"); // LAST, SUM, SUB, AVG // should be able to pass a function for custom relation
+
+  // SOLUTION 3
+//  Potentiometer* pot1 = new Potentiometer();
+//  MidiInput* midiIn1 = new MidiInput();
+//  Parameter* param1 = new Parameter("paramName1");
+//  param1->setOnChange(onChangeParam1);
+//  IOConnection* patchCord1 = new IOConnection(pot1, param1);
+//  IOConnection* patchCord2 = new IOConnection(midiIn1, param1);
+  
+  
+  // SOLUTION 4
+//  Motherboard.registerParameter("paramName", CONTROL, MIDI_CHANNEL, MIDI_CC);
+
+
 
 //  ToggleOnOffOn* tog = new ToggleOnOffOn();
   
@@ -95,42 +192,42 @@ void setup()
 //  in8->setOnGateClose(onGateClose);
 //  in8->setSmoothing(0);
 
-  out = new CvOut();
-  out2 = new CvOut();
-  out3 = new CvOut();
-  out4 = new CvOut();
-  out5 = new CvOut();
-  out6 = new CvOut();
-  out7 = new CvOut();
-  out8 = new CvOut();
+//  out = new CvOut();
+//  out2 = new CvOut();
+//  out3 = new CvOut();
+//  out4 = new CvOut();
+//  out5 = new CvOut();
+//  out6 = new CvOut();
+//  out7 = new CvOut();
+//  out8 = new CvOut();
 
-//  Motherboard.setDebug(true);
-  Motherboard.init("Motherboard", 2,
-                   {
-                    pot1, pot2,
-                    pot3, pot4,
-                    pot5, pot6,
-                    None, None,
-                   },
-                   {
-                    None, None,
-                    None, None,
-                    None, None,
-                    None, None
-                   });
+  Motherboard.setDebug(true);
+  Motherboard.init("Motherboard", 2);
 
 
-  Motherboard.setHandleMidiNoteOn(noteOnCallback);
-  
-  Serial.println("Ready!");
+//  Motherboard.setHandleMidiNoteOn(noteOnCallback);
 }
 
 elapsedMillis timeOut;
 int outValue = 0;
 int outValue2 = 0;
 
+
+const unsigned int intervalRefresh = 4;
+elapsedMicros clockRefresh;
+
 void loop()
 {
+
+//  if (clockRefresh >= intervalRefresh){
+//    b1->update(intervalRefresh);
+//    b2->update(intervalRefresh);
+//    b3->update(intervalRefresh);
+//  }
+
+//  Serial.print(pot1->getValue());
+//  Serial.print(" ");
+//  Serial.println(customStream1.getValue());
   Motherboard.update();
 
 
@@ -175,16 +272,22 @@ void onChangePot1(byte inputIndex, float value, float diffToPrevious){
 
 //  float mapped = map(value,0,4095,0,1000);
 //  waveform1.frequency(mapped);
-  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, value);
+
+//  customStream1.setTarget(value);
+
+//  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, value);
 }
 
-void onChangePot2(byte inputIndex, float value, float diffToPrevious){
+void onChangePot2(String name, float value, float diffToPrevious){
 //  waveform1.amplitude(map(value,0,4095,0,0.05));
+//amp.gain(map(value,0,4095,0,2));
+  sine->frequency(map(value,0,4095,0,20));
+//Serial.println("onChangePot2");
 }
 void onChangePot3(byte inputIndex, float value, float diffToPrevious){
 //  float mapped = map(value,0,4095,0,1000);
 //  waveform2.frequency(mapped);
-  Motherboard.setLED(1, MotherboardNamespace::Led::Status::On, value);
+//  Motherboard.setLED(1, MotherboardNamespace::Led::Status::On, value);
 }
 void onChangePot4(byte inputIndex, float value, float diffToPrevious){
 //  float mapped = map(value,0,4095,0,0.05);
@@ -195,7 +298,7 @@ void onChangePot4(byte inputIndex, float value, float diffToPrevious){
 void onVelocityChange(byte inputIndex, float value, float diffToPrevious){
 //  float gainValue = map(value, 0, 4095, 0, 1);
 //  getInstance()->voices[0]->getOutput()->gain(1, gainValue);
-  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, value);
+//  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, value);
 }
 
 void onChangeQuantized(byte inputIndex, int note){
@@ -207,14 +310,14 @@ void onGateOpen(byte inputIndex){
   Serial.print("onGateOpen ");
   Serial.println(inputIndex);
 
-  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, 4095);
+//  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, 4095);
 }
 
 void onGateClose(byte inputIndex){
   Serial.print("onGateClose ");
   Serial.println(inputIndex);
   
-  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, 0);
+//  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, 0);
 }
 
 void noteOnCallback(byte channel, byte note, byte velocity){

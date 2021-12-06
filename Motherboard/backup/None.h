@@ -7,6 +7,7 @@
 class None : public Input, public Output
 {
 public:
+  bool isDirectToTeensy() override {Serial.println("None");return false;}
   void read() override;
 
   String getType() override;

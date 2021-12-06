@@ -6,6 +6,9 @@
 class Button : public Input
 {
 public:
+
+  bool isDirectToTeensy() override {Serial.println("Button");return false;}
+  
     void read() override;
 
     String getType() override;
