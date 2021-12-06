@@ -7,15 +7,15 @@ class ADac : public APhysicalOutput
 {
 
 public:
-  using APhysicalOutput::APhysicalOutput;
+//  using APhysicalIO::APhysicalIO;
+  ADac(int index, String name);
 
-  String getType() override;
+protected:
+  String type = "ADac";
 };
 
-
-inline String ADac::getType()
-{
-  return "ADac";
+inline ADac::ADac(int index, String name):APhysicalOutput{index, name}{
+  AIO::registerOutput(this);
 }
 
 #define ADac MotherboardNamespace::ADac

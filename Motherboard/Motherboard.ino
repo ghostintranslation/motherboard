@@ -89,18 +89,23 @@ void setup()
   sine->amplitude(0.1);
   
   ALed* led1 = new ALed(0);
-//  led1->setOnChange(onChangePot2);
+//  led1->setOnGateOpen(onGateOpen);
+//  led1->setOnGateClose(onGateClose);
 
   ALed* led2 = new ALed(1);
+//  led2->setStatus(ALed::Status::BlinkFast);
 
   ADac* dac1 = new ADac(0, "dac1");
 //  dac1->setOnChange(onChangePot2);
   
   APotentiometer* pot1 = new APotentiometer(0, "pot1");
-//  pot1->setOnChange(onChangePot2);
+//  pot1->setOnGateOpen(onGateOpen);
+//  pot1->setOnGateClose(onGateClose);
 
   APotentiometer* pot2 = new APotentiometer(1, "pot2");
-  pot1->setOnChange(onChangePot2);
+  pot2->setOnChange(onChangePot2);
+//  pot2->setOnGateOpen(onGateOpen);
+//  pot2->setOnGateClose(onGateClose);
 
   AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *dac1, 0);
   AudioConnection* patchCord2 = new AudioConnection(*sine, 0, *led1, 0);
@@ -306,16 +311,16 @@ void onChangeQuantized(byte inputIndex, int note){
   Serial.println(note);
 }
 
-void onGateOpen(byte inputIndex){
+void onGateOpen(String name){
   Serial.print("onGateOpen ");
-  Serial.println(inputIndex);
+  Serial.println(name);
 
 //  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, 4095);
 }
 
-void onGateClose(byte inputIndex){
+void onGateClose(String name){
   Serial.print("onGateClose ");
-  Serial.println(inputIndex);
+  Serial.println(name);
   
 //  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, 0);
 }

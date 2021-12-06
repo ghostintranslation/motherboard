@@ -11,13 +11,10 @@ public:
   bool isDirectToTeensy() {return false;}
     
   void read() override;
-  String getType() override;
-};
 
-inline String APotentiometer::getType()
-{
-  return "APotentiometer";
-}
+protected:
+  String type = "APotentiometer";
+};
 
 inline void APotentiometer::read()
 {

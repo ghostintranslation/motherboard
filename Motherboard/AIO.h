@@ -17,13 +17,13 @@ public:
 
         String getName();
         
-        virtual String getType() = 0;
+        String getType();
     
         float getValue();
         
         float getTarget();
         
-        void setTarget(float target);
+        virtual void setTarget(float target);
 
         void setOnChange(ChangeCallback changeCallback);
     
@@ -55,6 +55,8 @@ private:
         
 protected:      
         String name = "";
+        
+        String type = "";
          
         // The previous value
         float previousValue = 0;
@@ -114,6 +116,11 @@ inline String AIO::getName()
     return this->name;
 }
 
+inline String AIO::getType()
+{
+    return this->type;
+}
+
 inline float AIO::getValue()
 {
     return this->value;
@@ -137,10 +144,9 @@ inline void AIO::update()
  
     block = receiveReadOnly(0);
     if (block){
-      this->target = block->data[0]; // TODO: instead of using one value and dropping the 127 others, drop 1
+      this->setTarget(constrain(block->data[0], 0, 4095)); // TODO: instead of using one value and dropping the 127 others, drop 1
       release(block);
     }
-  
 
     // Update the value to reach the target
     if (this->target != this->value)
@@ -199,25 +205,25 @@ inline void AIO::onValueChange(){
   {
     this->changeCallback(this->name, this->value, this->value - this->previousValue);
   }
-//
-//  // Debouncing
-//  if(this->debounceTime < this->debounceDelay){
-//    return;
-//  }
-//
-//  if((this->value > 4095 / 1.5) && !this->isGateOpen){
-//    if (this->gateOpenCallback != nullptr){
-//      this->gateOpenCallback(this->name);
-//    }
-//    this->isGateOpen = true;
-//    this->debounceTime = 0;
-//  }else if((this->value < 4095 / 4) && this->isGateOpen){
-//    if (this->gateCloseCallback != nullptr){
-//      this->gateCloseCallback(this->name);
-//    }
-//    this->isGateOpen = false;
-//    this->debounceTime = 0;
-//  }
+
+  // Debouncing
+  if(this->debounceTime < this->debounceDelay){
+    return;
+  }
+
+  if((this->value > 4095 / 1.5) && !this->isGateOpen){
+    if (this->gateOpenCallback != nullptr){
+      this->gateOpenCallback(this->name);
+    }
+    this->isGateOpen = true;
+    this->debounceTime = 0;
+  }else if((this->value < 4095 / 4) && this->isGateOpen){
+    if (this->gateCloseCallback != nullptr){
+      this->gateCloseCallback(this->name);
+    }
+    this->isGateOpen = false;
+    this->debounceTime = 0;
+  }
 }
 
 /**

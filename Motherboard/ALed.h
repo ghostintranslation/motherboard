@@ -3,7 +3,7 @@
 
 #include "APhysicalOutput.h"
 
-class ALed : public APhysicalOutput
+class ALed : public APhysicalIO
 {
 
 public:
@@ -20,12 +20,12 @@ public:
   
   ALed(int index);
 
-  String getType() override;
-
   void print() override;
 
-  void update(unsigned int updateMillis);
+  void update() override;
   void set(Status status, int brightness);
+  void setStatus(Status status);
+  void setTarget(float target) override;
 
 private:
   Status status = Off;
@@ -35,10 +35,13 @@ private:
 
   // Time counter for the blinking
   elapsedMillis blinkTime;
+
+protected:
+  String type = "ALed";
 };
 
-inline ALed::ALed(int index):APhysicalOutput{index, "ALed"}{
-  this->index = index;
+inline ALed::ALed(int index):APhysicalIO{index, (String)"ALed" + index}{
+  AIO::registerLed(this);
 }
 
 inline void ALed::set(Status status, int brightness)
@@ -59,9 +62,13 @@ inline void ALed::set(Status status, int brightness)
   }
 }
 
-inline void ALed::update(unsigned int updateMillis)
+inline void ALed::setStatus(Status status){
+  this->status = status;
+}
+
+inline void ALed::update()
 {
-  APhysicalOutput::update();
+  APhysicalIO::update();
 
   switch (this->status)
   {
@@ -100,10 +107,11 @@ inline void ALed::update(unsigned int updateMillis)
   }
 }
 
-inline String ALed::getType()
+inline void ALed::setTarget(float target)
 {
-  return "ALed";
+    this->requestedTarget = target;
 }
+
 
 inline void ALed::print()
 {
