@@ -19,10 +19,10 @@ public:
     
     void setAnalogMaxValue(unsigned int analogMaxValue);
 
-    static void onMidiControlChange(byte channel, byte controlNumber, byte value);
-    void setMidiControlChange(int controlNumber);
-    int getMidiControlNumber();
-    void setMidiTarget(byte channel, byte controlNumber, byte value);
+//    static void onMidiControlChange(byte channel, byte controlNumber, byte value);
+//    void setMidiControlChange(int controlNumber);
+//    int getMidiControlNumber();
+//    void setMidiTarget(byte channel, byte controlNumber, byte value);
 
 protected:
     // The pin on which the PhysicalInput can be read
@@ -32,7 +32,7 @@ protected:
     
     unsigned int analogMinValue = 0;
 
-    int midiControlNumber = -1;
+    unsigned int previousReading = 0;
 };
 
 inline PhysicalInput::PhysicalInput(int index, String name):PhysicalIO{index, name}
@@ -50,25 +50,25 @@ inline void PhysicalInput::setAnalogMaxValue(unsigned int analogMaxValue){
   this->analogMaxValue = analogMaxValue;
 }
 
-inline void PhysicalInput::onMidiControlChange(byte channel, byte controlNumber, byte value){
+//inline void PhysicalInput::onMidiControlChange(byte channel, byte controlNumber, byte value){
 //    int target = map(value, 0,127, 0, 4095);
 //    setTarget(target);
-}
+//}
 
 // TODO: Something like that
 // We should be able to have multiple callbacks on one control number
 // We should have a function to specify the range too, so the setTarget is set with a mapped value
-inline void PhysicalInput::setMidiControlChange(int controlNumber){
-  this->midiControlNumber = controlNumber;
-}
+//inline void PhysicalInput::setMidiControlChange(int controlNumber){
+//  this->midiControlNumber = controlNumber;
+//}
 
-inline int PhysicalInput::getMidiControlNumber(){
-  return this->midiControlNumber;
-}
+//inline int PhysicalInput::getMidiControlNumber(){
+//  return this->midiControlNumber;
+//}
 
-inline void PhysicalInput::setMidiTarget(byte channel, byte controlNumber, byte value){
-  
-}
+//inline void PhysicalInput::setMidiTarget(byte channel, byte controlNumber, byte value){
+//  
+//}
 
 //#define PhysicalInput MotherboardNamespace::PhysicalInput
 #endif

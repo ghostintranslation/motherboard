@@ -89,122 +89,43 @@ void setup()
   sine->amplitude(0.1);
   
   Led* led1 = new Led(0);
-//  led1->setOnGateOpen(onGateOpen);
-//  led1->setOnGateClose(onGateClose);
-
+  led1->setMidiCC(0); // CC number, the channel is the board one
   Led* led2 = new Led(1);
-//  led2->setStatus(Led::Status::BlinkFast);
+  led2->setMidiCC(0); // CC number, the channel is the board one
 
   OutputDac* dac1 = new OutputDac(0, "dac1");
-//  dac1->setOnChange(onChangePot2);
+//  dac1->setMidiCC(1); // CC number, the channel is the board one
   
   InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
-//  pot1->setOnGateOpen(onGateOpen);
-//  pot1->setOnGateClose(onGateClose);
+  pot1->setMidiCC(1); // CC number, the channel is the board one
 
-  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
-  pot2->setOnChange(onChangePot2);
-//  pot2->setOnGateOpen(onGateOpen);
-//  pot2->setOnGateClose(onGateClose);
+//  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
+//  pot2->setOnChange(onChangePot2);
 
-  AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *dac1, 0);
-  AudioConnection* patchCord2 = new AudioConnection(*sine, 0, *led1, 0);
-  AudioConnection* patchCord3 = new AudioConnection(*pot2, 0, *led2, 0);
+//  AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *dac1, 0);
+//  AudioConnection* patchCord2 = new AudioConnection(*sine, 0, *led1, 0);
+//  AudioConnection* patchCord3 = new AudioConnection(*pot2, 0, *led2, 0);
+  AudioConnection* patchCord1 = new AudioConnection(*pot1, 0, *led2, 0);
 
+//  TODO: Virtual IOs
+//  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
+//  inputMidiNote->onNoteOn(callback);
+//  inputMidiNote->onNoteOff(callback);
+//  inputMidiNote->setOnChange(callback);
 
+//  InputMidiCC* inputMidiCC = new InputMidiCC(0); // 0 = channel, the channel is the board one
+//  inputMidiCC->setOnChange(callback);
 
-  // SOLUTION 1
-//  Potentiometer* pot1 = new Potentiometer("paramName1");
-//  pot1->setMidi(1, 20);
-//  pot1->setOnChange(onChangePot1);
-//  
-//  MidiInput* midiIn1 = new MidiInput("paramName2", 1, 21);
-//  midiIn1->setOnChange(onChangeMidiIn1);
+//  OutputMidiNote* outputMidiNote = new OutputMidiNote(0);
+//  outputMidiNote->setOnChange(callback);
+//  outputMidiNote->sendNoteOn(note, velocity);
+//  outputMidiNote->sendNoteOff(note, velocity);
 
-  // SOLUTION 2
-//  b1 = new Block("b1");
-//  b2 = new Block("b2");
-//  b3 = new Block("b3");
-//  b1->addOutput(b2);
-//  b1->addOutput(b3);
-//  b2->addInput(b1);
-//  b3->addInput(b1);
+//  OutputMidiCC* outputMidiCC = new OutputMidiCC(0);
+//  outputMidiCC->setOnChange(callback);
+//  outputMidiCC->set(value);
 
 
-   
-//  pot1 = new InputPotentiometer(0, "pot1");
-//  pot2 = new InputPotentiometer(1, "pot2");
-//  pot1->setOnChange(onChangePot1);
-  
-//  Potentiometer* pot0 = new Potentiometer(0, "pot0");
-//  pot0->setOnChange(onChangePot0);
-  
-//  Potentiometer* pot1 = new Potentiometer(1, "pot1");
-
-//  Potentiometer* pot2 = new Potentiometer(2, "pot2");
-  
-//  VirtualInput* virtualInput1 = new VirtualInput(); // Virtual inputs allow to benefits from smoothing and interract in a multiple inputs parameter
-//  virtualInput1->setValue(10);
-//  
-//  Parameter* param0 = new Parameter("param0");
-//  param0->setMidi(1, 21);
-//  param0->addInput(pot0);
-//  param0->setOnChange(onChangeParam1);
-//  
-//  Parameter* param2 = new Parameter("param2");
-//  param2->setMidi(1, 21);
-//  param2->addInput(pot2);
-//  param2->setOnChange(onChangeParam2);
-//  
-//  Parameter* param1 = new Parameter("param1");
-//  param1->setMidi(1, 25); // MIDI would override the value
-//  param1->setValue(10); // This would override the value
-//  param1->addInput(pot0);
-//  param1->addInput(virtualInput1);
-//  param1->setOnChange(onChangeParam1);
-//  param1->setInputsRelation("SUM"); // LAST, SUM, SUB, AVG // should be able to pass a function for custom relation
-
-  // SOLUTION 3
-//  Potentiometer* pot1 = new Potentiometer();
-//  MidiInput* midiIn1 = new MidiInput();
-//  Parameter* param1 = new Parameter("paramName1");
-//  param1->setOnChange(onChangeParam1);
-//  IOConnection* patchCord1 = new IOConnection(pot1, param1);
-//  IOConnection* patchCord2 = new IOConnection(midiIn1, param1);
-  
-  
-  // SOLUTION 4
-//  Motherboard.registerParameter("paramName", CONTROL, MIDI_CHANNEL, MIDI_CC);
-
-
-
-//  ToggleOnOffOn* tog = new ToggleOnOffOn();
-  
-//  Potentiometer* pot5 = new Potentiometer();
-// pot5->setOnChange(onChange);
-// pot5->setSmoothing(50);
-  
-//  Potentiometer* pot6 = new Potentiometer();
-
-  
-//  CvIn* in7 = new CvIn();
-//  in7->setOnChangeQuantized(onChangeQuantized);
-//  in7->setSmoothing(0);
-//
-//  CvIn* in8 = new CvIn();
-//  in8->setOnChange(onVelocityChange);
-//  in8->setOnGateOpen(onGateOpen);
-//  in8->setOnGateClose(onGateClose);
-//  in8->setSmoothing(0);
-
-//  out = new CvOut();
-//  out2 = new CvOut();
-//  out3 = new CvOut();
-//  out4 = new CvOut();
-//  out5 = new CvOut();
-//  out6 = new CvOut();
-//  out7 = new CvOut();
-//  out8 = new CvOut();
 
   Motherboard.setDebug(true);
   Motherboard.init("Motherboard", 2);

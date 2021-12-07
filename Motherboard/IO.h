@@ -30,8 +30,13 @@ public:
         void setOnGateOpen(EdgeCallback gateOpenCallback);//onGateOn ?
     
         void setOnGateClose(EdgeCallback gateCloseCallback);//onGateOff ?
-        
-    virtual void print();
+
+    // MIDI
+        void setMidiCC(byte controlNumber);
+
+        int getMidiCC();
+
+        virtual void onMidiCC(unsigned int value);
         
     // Registrar
     static void registerInput(PhysicalInput* input);
@@ -43,6 +48,9 @@ public:
     static unsigned int inputsSize;
     static unsigned int outputsSize;
     static unsigned int ledsSize;
+
+    // Debug
+    virtual void print();
     
 private:
     audio_block_t *inputQueueArray[1];
@@ -87,7 +95,11 @@ protected:
         
          elapsedMillis debounceTime = 0;
          unsigned int debounceDelay = 100;
-         
+
+         // MIDI
+         int midiControlNumber = -1;
+
+         unsigned int midiValue = 0;
 };
 
 
@@ -298,6 +310,18 @@ inline PhysicalOutput** IO::getOutputs(){
 inline Led** IO::getLeds(){
   return leds;
 };
+
+inline void IO::setMidiCC(byte controlNumber){
+  this->midiControlNumber = controlNumber;
+}
+
+inline int IO::getMidiCC(){
+  return this->midiControlNumber;
+}
+
+inline void IO::onMidiCC(unsigned int value){
+  this->midiValue = value;
+}
 
 inline void IO::print()
 {

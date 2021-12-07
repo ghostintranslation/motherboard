@@ -1,6 +1,7 @@
 #ifndef MidiManager_h
 #define MidiManager_h
 
+#include "IO.h"
 //#include <vector>
 #include <MIDI.h>
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
@@ -55,7 +56,7 @@ private:
     MidiManager();
 
     // Channel
-    byte midiChannel;
+    byte midiChannel = 1; // 1 to 16
 
     // Callbacks
     MidiNoteOnCallback midiNoteOnCallback = nullptr;
@@ -96,12 +97,12 @@ inline MidiManager *MidiManager::getInstance()
 inline void MidiManager::init()
 {
   MIDI.setHandleControlChange(this->handleMidiControlChange);
+  usbMIDI.setHandleControlChange(this->handleMidiControlChange);
   MIDI.setHandleNoteOn(this->midiNoteOnCallback);
   usbMIDI.setHandleNoteOn(this->midiNoteOnCallback);
   MIDI.setHandleNoteOff(this->midiNoteOffCallback);
   usbMIDI.setHandleNoteOff(this->midiNoteOffCallback);
 //   usbMIDI.setHandleSystemExclusive(this->handleMidiSysEx);
-//   usbMIDI.setHandleControlChange(this->handleMidiControlChange);
 
   Serial1.begin(31250, SERIAL_8N1_RXINV);
 }
@@ -210,9 +211,32 @@ inline void MidiManager::handleMidiControlChange(byte channel, byte control, byt
   // Internal midi channel is from 1 to 16
   // Incoming channel is from 1 to 16
   // Callbacks channel is from 0 to 16, 0 meaning bounded with internal midi channel
-  
+
+  // value from 0 to 127
+
+  unsigned int val = map(value, 0, 127, 0, 4095);
+
   // If the incoming message's channel corresponds to the board's channel 
   if(getInstance()->midiChannel == channel){
+    
+    for(unsigned int i = 0; i< IO::inputsSize; i++){
+      if(IO::getInputs()[i]->getMidiCC() == control){
+        IO::getInputs()[i]->onMidiCC(val);
+      }
+    }
+
+    for(unsigned int i = 0; i< IO::outputsSize; i++){
+      if(IO::getOutputs()[i]->getMidiCC() == control){
+        IO::getOutputs()[i]->onMidiCC(val);
+      }
+    }
+
+    for(unsigned int i = 0; i< IO::ledsSize; i++){
+      if(IO::getLeds()[i]->getMidiCC() == control){
+        IO::getLeds()[i]->onMidiCC(val);
+      }
+    }
+    
     // Callbacks on internal channel 0 are to be triggered on the board's channel
 //    for(ConfigManager::MidiControl mc : ConfigManager.getMidiControls()) {
 //      if(mc.midiChannel == 0 && mc.midiCC == control){

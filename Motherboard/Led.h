@@ -25,6 +25,8 @@ public:
   void setStatus(Status status);
   void setTarget(float target) override;
 
+  void onMidiCC(unsigned int value) override;
+
 private:
   Status status = Off;
 
@@ -107,9 +109,14 @@ inline void Led::update()
 
 inline void Led::setTarget(float target)
 {
-    this->requestedTarget = target;
+  this->requestedTarget = target;
 }
 
+inline void Led::onMidiCC(unsigned int value){
+  IO::onMidiCC(value);
+  
+  this->requestedTarget = value;
+}
 
 inline void Led::print()
 {

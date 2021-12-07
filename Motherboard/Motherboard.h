@@ -10,8 +10,8 @@ namespace MotherboardNamespace{
 
 class Motherboard;
 
-//#include "MidiManager.h"
 #include "IOManager.h"
+#include "MidiManager.h"
 
 /** 
  * Motherboard
@@ -25,7 +25,7 @@ private:
   Motherboard();
 
   IOManager* ioManager;
-//  MidiManager* midiManager;
+  MidiManager* midiManager;
 
   bool debug = false;
   elapsedMillis clockDebug;
@@ -93,8 +93,8 @@ inline void Motherboard::init(String deviceName, int columnNumber)
   if (this->debug) {
     Serial.println("MidiManager init...");
   }
-//  this->midiManager = MidiManager::getInstance();
-//  midiManager->init();
+  this->midiManager = MidiManager::getInstance();
+  midiManager->init();
   
   //  ioManager->getMidiChannel();
   //
@@ -112,7 +112,7 @@ inline void Motherboard::init(String deviceName, int columnNumber)
 inline void Motherboard::update()
 {
   ioManager->update();
-//  midiManager->update();
+  midiManager->update();
 
   // Debug
    if (this->debug && this->clockDebug >= 10) {
