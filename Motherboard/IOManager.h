@@ -37,7 +37,7 @@ using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 //#include "None.h"
 
 #include "InputPotentiometer.h"
-#include "OutputDac.h"
+#include "OutputCV.h"
 #include "Led.h"
 
 class IOManager

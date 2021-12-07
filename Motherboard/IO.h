@@ -8,6 +8,13 @@ class PhysicalInput;
 class PhysicalOutput;
 class Led;
 
+enum MidiMode
+{
+  Either,
+  Multiply,
+  Add
+};
+
 class IO : public AudioStream
 {
 public:
@@ -37,6 +44,8 @@ public:
         int getMidiCC();
 
         virtual void onMidiCC(unsigned int value);
+
+        void setMidiMode(MidiMode mode);
         
     // Registrar
     static void registerInput(PhysicalInput* input);
@@ -68,6 +77,8 @@ protected:
          
         // The previous value
         float previousValue = 0;
+
+        float previousStreamValue = 0;
         
         // The actual value
         float value = 0;
@@ -100,6 +111,8 @@ protected:
          int midiControlNumber = -1;
 
          unsigned int midiValue = 0;
+
+         MidiMode midiMode = Either;
 };
 
 
@@ -145,7 +158,29 @@ inline float IO::getTarget()
 
 inline void IO::setTarget(float target)
 {
+//    this->target = target;
+  if(this->midiControlNumber > -1){
+    switch(this->midiMode){
+      case Multiply:
+        this->target = target * map((float)this->midiValue,0,4095,0,1);
+      break;
+
+      case Add:
+        this->target = constrain(target + this->midiValue,0,4095);
+      break;
+      
+      case Either:
+      default:
+        this->target = target;
+      break;
+    }
+  }else{
     this->target = target;
+  }
+}
+
+inline void IO::setMidiMode(MidiMode mode){
+  this->midiMode = mode;
 }
 
 inline void IO::update()
@@ -153,10 +188,15 @@ inline void IO::update()
     // Set the target from the input
     audio_block_t *block;
     uint32_t *p, *end;
+    unsigned int streamValue = 0;
  
     block = receiveReadOnly(0);
     if (block){
-      this->setTarget(constrain(block->data[0], 0, 4095)); // TODO: instead of using one value and dropping the 127 others, drop 1
+      streamValue = constrain(block->data[0], 0, 4095);
+      if(this->previousStreamValue != streamValue){
+        this->setTarget(streamValue); // TODO: instead of using one value and dropping the 127 others, drop 1
+        this->previousStreamValue  = streamValue;
+      }
       release(block);
     }
 
@@ -321,6 +361,7 @@ inline int IO::getMidiCC(){
 
 inline void IO::onMidiCC(unsigned int value){
   this->midiValue = value;
+  this->setTarget(value);
 }
 
 inline void IO::print()
@@ -330,6 +371,6 @@ inline void IO::print()
   Serial.printf("%07.2f", this->value);
 }
 
-//#define IO MotherboardNamespace::IO
+#define MidiMode MotherboardNamespace::MidiMode
 
 #endif

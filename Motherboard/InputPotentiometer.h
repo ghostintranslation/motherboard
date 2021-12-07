@@ -6,7 +6,7 @@
 class InputPotentiometer : public PhysicalInput
 {
 public:
-  using PhysicalInput::PhysicalInput;
+  InputPotentiometer(int index, String name);
   
   bool isDirectToTeensy() {return false;}
     
@@ -15,6 +15,10 @@ public:
 protected:
   String type = "InputPotentiometer";
 };
+
+inline InputPotentiometer::InputPotentiometer(int index, String name):PhysicalInput{index, name}{
+  this->midiMode = Multiply;
+}
 
 inline void InputPotentiometer::read()
 {
@@ -25,12 +29,8 @@ inline void InputPotentiometer::read()
 
   unsigned int newval = map(constrain(val, 35, 4086), 35, 4086, 0, 4095);
 
-  if(this->midiControlNumber > -1){
-    this->setTarget(newval * map((float)this->midiValue,0,4095,0,1));
-  }else{
-    this->setTarget(newval);
-  }
-  
+  this->setTarget(newval);
+    
   this->previousReading = newval;
 }
 
