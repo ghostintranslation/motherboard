@@ -2,6 +2,9 @@
 #define IO_h
 
 #include "AudioStream.h"
+#include "IOTypeGate.h"
+#include "IOTypeTrigger.h"
+#include "IOTypeCV.h"
 
 // Forward declarations
 class PhysicalInput;
@@ -15,6 +18,14 @@ enum MidiMode
   Add
 };
 
+//enum IOType
+//{
+//  Gate,
+//  Trigger,
+//  CV
+//};
+
+
 class IO : public AudioStream
 {
 public:
@@ -24,7 +35,7 @@ public:
 
         String getName();
         
-        String getType();
+        String getClassName();
     
         float getValue();
 
@@ -36,6 +47,9 @@ public:
         
         void updateTarget();
 
+        void setType(String type);
+  
+        // allbacks
         void setOnChange(ChangeCallback changeCallback);
     
         void setOnGateOpen(EdgeCallback gateOpenCallback);//onGateOn ?
@@ -73,11 +87,13 @@ private:
     static PhysicalOutput** outputs;
     
     static Led** leds;
+
+    IOType* ioType;
         
 protected:      
         String name = "";
         
-        String type = "";
+        String className = "";
          
         // The previous value
         float previousValue = 0;
@@ -138,6 +154,8 @@ inline IO::IO(String name) : AudioStream(1, inputQueueArray)
   // Set to always active so they always update
   // and we can read their values and get callbacks even without patch cords connected
   this->active = true;
+
+  this->ioType = new IOTypeCV();
 }
 
 inline String IO::getName()
@@ -145,9 +163,9 @@ inline String IO::getName()
     return this->name;
 }
 
-inline String IO::getType()
+inline String IO::getClassName()
 {
-    return this->type;
+    return this->className;
 }
 
 inline float IO::getValue()
@@ -156,7 +174,7 @@ inline float IO::getValue()
 }
 
 inline void IO::setValue(float value){
-  this->value = value;
+  this->value = this->ioType->processValue(value);
 }
 
 inline float IO::getTarget()
@@ -166,7 +184,7 @@ inline float IO::getTarget()
 
 inline void IO::setTarget(float target)
 {
-    this->target = target;
+    this->target = this->ioType->processTarget(target);
     this->updateTarget();
 }
 
@@ -194,12 +212,25 @@ inline void IO::updateTarget(){
   }
 }
 
+inline void IO::setType(String type){
+  if(type == "Gate"){
+    this->ioType = new IOTypeGate();
+  }else if(type == "Trigger"){
+    this->ioType = new IOTypeTrigger();
+  }else{
+    this->ioType = new IOTypeCV();
+  }
+}
+
 inline void IO::setMidiMode(MidiMode mode){
   this->midiMode = mode;
 }
 
 inline void IO::update()
 { 
+    // Maybe alter the smoothing
+    this->smoothing = this->ioType->processSmoothing(this->smoothing);
+    
     // Set the target from the input
     audio_block_t *block;
     uint32_t *p, *end;
@@ -215,6 +246,8 @@ inline void IO::update()
       release(block);
     }
 
+    this->target = this->ioType->processTargetBeforeValueUpdate(this->target);
+    
     // Update the value to reach the target
     if (this->target != this->value)
     {
@@ -375,9 +408,10 @@ inline int IO::getMidiCC(){
 }
 
 inline void IO::onMidiCC(unsigned int value){
-  this->midiValue = value;
+  this->midiValue = this->ioType->processMidiCC(value);
+  
   if(this->midiMode == Either){
-    this->setTarget(value);
+    this->setTarget(this->midiValue);
   }else{
     this->updateTarget();
   }

@@ -13,7 +13,7 @@ public:
   void read() override;
 
 protected:
-  String type = "InputPotentiometer";
+  String className = "InputPotentiometer";
 };
 
 inline InputPotentiometer::InputPotentiometer(int index, String name):PhysicalInput{index, name}{

@@ -37,7 +37,7 @@ private:
   elapsedMillis blinkTime;
 
 protected:
-  String type = "Led";
+  String className = "Led";
 };
 
 inline Led::Led(int index):PhysicalIO{index, (String)"Led" + index}{

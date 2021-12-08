@@ -88,7 +88,7 @@ void setup()
   sine->frequency(0.5);
   sine->amplitude(0.1);
   
-//  Led* led1 = new Led(0);
+  Led* led1 = new Led(0);
 //  led1->setMidiCC(0); // CC number, the channel is the board one
   Led* led2 = new Led(1);
 //  led2->setMidiCC(0); // CC number, the channel is the board one
@@ -101,20 +101,25 @@ void setup()
 //  outputGate1->setMidiCC(3); // CC number, the channel is the board one
 //  outputGate1->setMidiMode(MidiMode::Multiply);
 
-  OutputTrigger* outputTrigger1 = new OutputTrigger(0, "outputTrigger1");
-  outputTrigger1->setMidiCC(1); // CC number, the channel is the board one
+//  OutputTrigger* outputTrigger1 = new OutputTrigger(0, "outputTrigger1");
+//  outputTrigger1->setMidiCC(1); // CC number, the channel is the board one
   
-//  InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
+  InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
+pot1->setType("Gate");
 //  pot1->setMidiCC(1); // CC number, the channel is the board one
 //  pot1->setMidiMode(MidiMode::Multiply);
 
-//  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
+  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
+pot2->setType("Trigger");
 //  pot2->setOnChange(onChangePot2);
 
-  AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *outputTrigger1, 0);
-//  AudioConnection* patchCord2 = new AudioConnection(*sine, 0, *led1, 0);
-//  AudioConnection* patchCord3 = new AudioConnection(*pot2, 0, *led2, 0);
-  AudioConnection* patchCord4 = new AudioConnection(*outputTrigger1, 0, *led2, 0);
+OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
+OutputJack* outputJack2 = new OutputJack(1, "outputJack1");
+
+  AudioConnection* patchCord1 = new AudioConnection(*pot1, 0, *outputJack1, 0);
+  AudioConnection* patchCord2 = new AudioConnection(*pot2, 0, *outputJack2, 0);
+  AudioConnection* patchCord3 = new AudioConnection(*outputJack1, 0, *led1, 0);
+  AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
 
 //  TODO: Virtual IOs
 //  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
@@ -136,7 +141,7 @@ void setup()
 
 
 
-//  Motherboard.setDebug(true);
+  Motherboard.setDebug(true);
   Motherboard.init("Motherboard", 2);
 
 
