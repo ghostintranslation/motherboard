@@ -11,6 +11,7 @@ public:
   OutputGate(int index, String name);
 
   void setValue(float value) override;
+  void setValue(bool value);
   void setTarget(float target) override;
   void onMidiCC(unsigned int value);
   void update() override;
@@ -32,6 +33,14 @@ inline void OutputGate::setValue(float value){
   }
 
   PhysicalOutput::setValue(newVal);
+}
+
+inline void OutputGate::setValue(bool value){
+  if(value){
+    this->setValue((float)4095);
+  }else{
+    this->setValue((float)0);
+  }
 }
 
 inline void OutputGate::setTarget(float target){
