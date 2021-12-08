@@ -27,10 +27,14 @@ public:
         String getType();
     
         float getValue();
+
+        virtual void setValue(float value);
         
         float getTarget();
         
         virtual void setTarget(float target);
+        
+        void updateTarget();
 
         void setOnChange(ChangeCallback changeCallback);
     
@@ -151,6 +155,10 @@ inline float IO::getValue()
     return this->value;
 }
 
+inline void IO::setValue(float value){
+  this->value = value;
+}
+
 inline float IO::getTarget()
 {
     return this->target;
@@ -158,24 +166,31 @@ inline float IO::getTarget()
 
 inline void IO::setTarget(float target)
 {
-//    this->target = target;
+    this->target = target;
+    this->updateTarget();
+}
+
+inline void IO::updateTarget(){
   if(this->midiControlNumber > -1){
     switch(this->midiMode){
       case Multiply:
-        this->target = target * map((float)this->midiValue,0,4095,0,1);
+        this->target = this->target * map((float)this->midiValue,0,4095,0,1);
       break;
 
       case Add:
-        this->target = constrain(target + this->midiValue,0,4095);
+        this->target = constrain(this->target + this->midiValue,0,4095);
       break;
       
       case Either:
       default:
-        this->target = target;
+//      Serial.println(this->target);
+//      Serial.println(this->midiValue);
+//      Serial.println("");
+//        this->target = max(this->target, this->midiValue);
       break;
     }
   }else{
-    this->target = target;
+    this->target = this->target;
   }
 }
 
@@ -205,22 +220,22 @@ inline void IO::update()
     {
         if (this->smoothing == 1)
         {
-            this->value = this->target;
+            this->setValue(this->target);
         }
         else
         {
-            this->value += (this->smoothing * (this->target - this->value) / 1024) / (100 / this->updateMillis);
+            this->setValue(this->value + (this->smoothing * (this->target - this->value) / 1024) / (100 / this->updateMillis));
         }
     }
 
     // Rounding the float to compare to 0, because otherwise it is actually never quite 0
     // and we don't need more than 2 decimal precision
-    this->value = roundf(this->value * 100) / 100;
+    this->setValue(roundf(this->value * 100) / 100);
 
     // To eliminate noise
     if (this->target > 5 && this->value == 0)
     {
-        this->value = 0;
+        this->setValue(0);
     }
 
     // When value changes then call the callback.
@@ -361,7 +376,11 @@ inline int IO::getMidiCC(){
 
 inline void IO::onMidiCC(unsigned int value){
   this->midiValue = value;
-  this->setTarget(value);
+  if(this->midiMode == Either){
+    this->setTarget(value);
+  }else{
+    this->updateTarget();
+  }
 }
 
 inline void IO::print()

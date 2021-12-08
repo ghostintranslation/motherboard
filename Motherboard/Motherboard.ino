@@ -91,26 +91,27 @@ void setup()
 //  Led* led1 = new Led(0);
 //  led1->setMidiCC(0); // CC number, the channel is the board one
   Led* led2 = new Led(1);
-  led2->setMidiCC(0); // CC number, the channel is the board one
+//  led2->setMidiCC(0); // CC number, the channel is the board one
 
-  OutputCV* outputCV1 = new OutputCV(0, "outputCV1");
-  outputCV1->setMidiCC(2); // CC number, the channel is the board one
-  outputCV1->setMidiMode(MidiMode::Multiply);
+//  OutputCV* outputCV1 = new OutputCV(0, "outputCV1");
+//  outputCV1->setMidiCC(2); // CC number, the channel is the board one
+//  outputCV1->setMidiMode(MidiMode::Multiply);
   
-//  OutputCV* outputCV2 = new OutputCV(0, "outputCV2");
-//  outputCV2->setMidiCC(2); // CC number, the channel is the board one
+  OutputGate* outputGate1 = new OutputGate(0, "outputGate1");
+  outputGate1->setMidiCC(3); // CC number, the channel is the board one
+  outputGate1->setMidiMode(MidiMode::Multiply);
   
-  InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
-  pot1->setMidiCC(1); // CC number, the channel is the board one
+//  InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
+//  pot1->setMidiCC(1); // CC number, the channel is the board one
 //  pot1->setMidiMode(MidiMode::Multiply);
 
 //  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
 //  pot2->setOnChange(onChangePot2);
 
-  AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *outputCV1, 0);
+  AudioConnection* patchCord1 = new AudioConnection(*sine, 0, *outputGate1, 0);
 //  AudioConnection* patchCord2 = new AudioConnection(*sine, 0, *led1, 0);
 //  AudioConnection* patchCord3 = new AudioConnection(*pot2, 0, *led2, 0);
-  AudioConnection* patchCord4 = new AudioConnection(*pot1, 0, *led2, 0);
+  AudioConnection* patchCord4 = new AudioConnection(*outputGate1, 0, *led2, 0);
 
 //  TODO: Virtual IOs
 //  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
@@ -132,7 +133,7 @@ void setup()
 
 
 
-  Motherboard.setDebug(true);
+//  Motherboard.setDebug(true);
   Motherboard.init("Motherboard", 2);
 
 
