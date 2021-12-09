@@ -21,13 +21,11 @@ using ChangeCallback = void (*)(String name, float value, float diff);
 using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 
 
-//#include "Led.h"
 //#include "Input.h"
 //#include "Output.h"
 //#include "Button.h"
 //#include "Trigger.h"
 //#include "Gate.h"
-//#include "Potentiometer.h"
 //#include "RotaryEncoder.h"
 //#include "TouchPad.h"
 //#include "CvIn.h"
@@ -37,9 +35,6 @@ using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 //#include "None.h"
 
 #include "InputPotentiometer.h"
-//#include "OutputCV.h"
-//#include "OutputGate.h"
-//#include "OutputTrigger.h"
 #include "OutputJack.h"
 #include "Led.h"
 
@@ -63,7 +58,7 @@ public:
 //    void setSmoothing(byte smoothing);
     unsigned int getAnalogMaxValue();
     unsigned int getAnalogMinValue();
-    byte getMidiChannel();
+    byte getDipswitchValue();
 
     
     // Callbacks
@@ -89,16 +84,20 @@ private:
     byte maxIoNumber = 0;
     byte currentInputIndex = 0;
     byte currentOutputIndex = 0;
-
     byte analogResolution = 12;
-    byte midiChannel = 0;
-
+    byte dipswitchValue = 0;
     void iterateIO();
     void readWriteIO();
-
     
     static void handleMidiControlChange(byte channel, byte controlNumber, byte value);
 
+    // Calibration
+    byte calibrationSequenceSteps[4]= {15, 7, 15, 7};
+    byte calibrationSequenceCurrentStep = 0;
+    elapsedMillis calibrationSequenceClock;
+    const unsigned int calibrationSequenceClockMax = 5000;
+    void calibrate();
+    
     // Refresh clock
     const unsigned int intervalReadWrite = 4;
     elapsedMicros clockReadWrite;
@@ -176,6 +175,38 @@ inline void IOManager::update()
     {
         clockPWM = 0;
     }
+
+    
+    if(this->calibrationSequenceCurrentStep == 0){
+      this->calibrationSequenceClock = 0;
+    }
+    if(this->calibrationSequenceCurrentStep < 4){
+      if(this->calibrationSequenceSteps[this->calibrationSequenceCurrentStep] == this->getDipswitchValue()){
+        this->calibrationSequenceCurrentStep++;
+        this->calibrationSequenceCurrentStep %= 5;
+        this->calibrationSequenceClock = 0;
+      }
+      if(this->calibrationSequenceClock > this->calibrationSequenceClockMax){
+        this->calibrationSequenceClock = 0;
+        this->calibrationSequenceCurrentStep = 0;
+      }
+    }else{
+      for(unsigned int i = 0; i<IO::ledsSize; i++){
+        IO::getLeds()[i]->set(Led::Status::Blink, 4095);
+      }
+
+      this->calibrate();
+          
+      if(this->getDipswitchValue() == 15){
+        // Exit calibration
+        this->calibrationSequenceClock = 0;
+        this->calibrationSequenceCurrentStep = 0;
+        for(unsigned int i = 0; i<IO::ledsSize; i++){
+          IO::getLeds()[i]->set(Led::Status::Off, 0);
+        }
+      }
+    }
+    
 }
 
 /**
@@ -307,6 +338,25 @@ inline void IOManager::readWriteIO()
     if(IO::inputsSize > this->currentInputIndex){
       IO::getInputs()[this->currentInputIndex]->read();
     }
+
+    // Read the dipswitch
+    this->dipswitchValue = 0;
+    bool bit1 = digitalRead(MIDI_CHANNEL_A_PIN);
+    bool bit2 = digitalRead(MIDI_CHANNEL_B_PIN);
+    bool bit3 = digitalRead(MIDI_CHANNEL_C_PIN);
+    bool bit4 = digitalRead(MIDI_CHANNEL_D_PIN);
+    if(!bit1){
+      bitSet(this->dipswitchValue, 0);
+    }
+    if(!bit2){
+      bitSet(this->dipswitchValue, 1);
+    }
+    if(!bit3){
+      bitSet(this->dipswitchValue, 2);
+    }
+    if(!bit4){
+      bitSet(this->dipswitchValue, 3);
+    }
 }
 
 
@@ -404,9 +454,9 @@ inline float IOManager::getInputValue(byte index)
 //  }
 //}
 
-inline byte IOManager::getMidiChannel()
+inline byte IOManager::getDipswitchValue()
 {
-    return this->midiChannel;
+    return this->dipswitchValue;
 }
 
 /**
@@ -434,6 +484,25 @@ inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber,
 //          i->setTarget(target);
 //        }
 //    }
+}
+
+inline void IOManager::calibrate(){
+  for(unsigned int i = 0; i<IO::inputsSize; i++){
+    if(IO::getInputs()[i]->getClassName() == "InputPotentiometer"){
+      IO::getInputs()[i]->setCalibrate(true);
+      
+      if(IO::getInputs()[i]->getTarget() > IO::getInputs()[i]->getMin()){
+        IO::getInputs()[i]->setMin(IO::getInputs()[i]->getTarget());
+      }
+      if(IO::getInputs()[i]->getTarget() < IO::getInputs()[i]->getMax()){
+        IO::getInputs()[i]->setMax(IO::getInputs()[i]->getTarget());
+      }
+      IO::getInputs()[i]->setCalibrate(false);
+      
+      Serial.printf("%d %d %d\n", i, IO::getInputs()[i]->getMin(), IO::getInputs()[i]->getMax());
+    }
+  }
+
 }
 
 

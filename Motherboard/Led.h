@@ -25,7 +25,7 @@ public:
   void setStatus(Status status);
   void setTarget(float target) override;
 
-//  void onMidiCC(unsigned int value) override;
+  String getClassName() override{return "Led";}
 
 private:
   Status status = Off;
@@ -35,9 +35,6 @@ private:
 
   // Time counter for the blinking
   elapsedMillis blinkTime;
-
-protected:
-  String className = "Led";
 };
 
 inline Led::Led(int index):PhysicalIO{index, (String)"Led" + index}{

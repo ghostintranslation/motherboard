@@ -33,9 +33,19 @@ public:
         
         virtual void update(void);
 
+        void setCalibrate(bool calibrate);
+        
+        unsigned int getMin();
+        
+        unsigned int getMax();
+        
+        void setMin(unsigned int min);
+        
+        void setMax(unsigned int max);
+
         String getName();
         
-        String getClassName();
+        virtual String getClassName(){return "";};
     
         float getValue();
 
@@ -49,14 +59,14 @@ public:
 
         void setType(String type);
   
-        // allbacks
+        // Callbacks
         void setOnChange(ChangeCallback changeCallback);
     
         void setOnGateOpen(EdgeCallback gateOpenCallback);//onGateOn ?
     
         void setOnGateClose(EdgeCallback gateCloseCallback);//onGateOff ?
 
-    // MIDI
+        // MIDI
         void setMidiCC(byte controlNumber);
 
         int getMidiCC();
@@ -81,20 +91,25 @@ public:
     
 private:
     audio_block_t *inputQueueArray[1];
-        
+
+    bool calibrate = false;
+    
+    IOType* ioType;
+    
+    // Regitrar
     static PhysicalInput** inputs;
     
     static PhysicalOutput** outputs;
     
     static Led** leds;
-
-    IOType* ioType;
         
 protected:      
         String name = "";
+
+        unsigned int min = 0;
         
-        String className = "";
-         
+        unsigned int max = 4095;
+        
         // The previous value
         float previousValue = 0;
 
@@ -163,11 +178,6 @@ inline String IO::getName()
     return this->name;
 }
 
-inline String IO::getClassName()
-{
-    return this->className;
-}
-
 inline float IO::getValue()
 {
     return this->value;
@@ -184,8 +194,13 @@ inline float IO::getTarget()
 
 inline void IO::setTarget(float target)
 {
-    this->target = this->ioType->processTarget(target);
-    this->updateTarget();
+  if(this->calibrate){
+    this->target = target;
+    return;
+  }
+  
+  this->target = this->ioType->processTarget(target);
+  this->updateTarget();
 }
 
 inline void IO::updateTarget(){
@@ -228,6 +243,10 @@ inline void IO::setMidiMode(MidiMode mode){
 
 inline void IO::update()
 { 
+  if(this->calibrate){
+    return;
+  }
+  
     // Maybe alter the smoothing
     this->smoothing = this->ioType->processSmoothing(this->smoothing);
     
@@ -415,6 +434,26 @@ inline void IO::onMidiCC(unsigned int value){
   }else{
     this->updateTarget();
   }
+}
+
+inline void IO::setCalibrate(bool calibrate){
+  this->calibrate = calibrate;
+}
+
+inline void IO::setMin(unsigned int min){
+  this->min = min;
+}
+
+inline void IO::setMax(unsigned int max){
+  this->max = max;
+}
+
+inline unsigned int IO::getMin(){
+  return this->min;
+}
+
+inline unsigned int IO::getMax(){
+  return this->max;
 }
 
 inline void IO::print()

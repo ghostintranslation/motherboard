@@ -93,33 +93,22 @@ void setup()
   Led* led2 = new Led(1);
 //  led2->setMidiCC(0); // CC number, the channel is the board one
 
-//  OutputCV* outputCV1 = new OutputCV(0, "outputCV1");
-//  outputCV1->setMidiCC(2); // CC number, the channel is the board one
-//  outputCV1->setMidiMode(MidiMode::Multiply);
-  
-//  OutputGate* outputGate1 = new OutputGate(0, "outputGate1");
-//  outputGate1->setMidiCC(3); // CC number, the channel is the board one
-//  outputGate1->setMidiMode(MidiMode::Multiply);
-
-//  OutputTrigger* outputTrigger1 = new OutputTrigger(0, "outputTrigger1");
-//  outputTrigger1->setMidiCC(1); // CC number, the channel is the board one
-  
   InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
-pot1->setType("Gate");
+//pot1->setType("Gate");
 //  pot1->setMidiCC(1); // CC number, the channel is the board one
 //  pot1->setMidiMode(MidiMode::Multiply);
 
-  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
-pot2->setType("Trigger");
+//  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
+//pot2->setType("Trigger");
 //  pot2->setOnChange(onChangePot2);
 
 OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
 OutputJack* outputJack2 = new OutputJack(1, "outputJack1");
 
   AudioConnection* patchCord1 = new AudioConnection(*pot1, 0, *outputJack1, 0);
-  AudioConnection* patchCord2 = new AudioConnection(*pot2, 0, *outputJack2, 0);
+//  AudioConnection* patchCord2 = new AudioConnection(*pot2, 0, *outputJack2, 0);
   AudioConnection* patchCord3 = new AudioConnection(*outputJack1, 0, *led1, 0);
-  AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
+//  AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
 
 //  TODO: Virtual IOs
 //  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
@@ -141,7 +130,7 @@ OutputJack* outputJack2 = new OutputJack(1, "outputJack1");
 
 
 
-  Motherboard.setDebug(true);
+//  Motherboard.setDebug(true);
   Motherboard.init("Motherboard", 2);
 
 

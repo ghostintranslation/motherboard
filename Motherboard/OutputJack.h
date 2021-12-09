@@ -8,9 +8,8 @@ class OutputJack : public PhysicalOutput
 
 public:
   OutputJack(int index, String name);
-
-protected:
-  String className = "OutputJack";
+  
+  String getClassName() override {return "OutputJack";}
 };
 
 inline OutputJack::OutputJack(int index, String name):PhysicalOutput{index, name}{
