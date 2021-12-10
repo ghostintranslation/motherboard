@@ -3,6 +3,10 @@
 
 #include "IOType.h"
 
+/**
+ * Trigger inputs/outputs have only 2 values, 0 and 4095, 
+ * but also stay at high level only for a few ms.
+ */
 class IOTypeTrigger : public IOType
 {
 
@@ -15,7 +19,7 @@ public:
     
     virtual float processSmoothing(float smoothing) override;
 
-    virtual float processTargetBeforeValueUpdate(float target) override;
+//    virtual float processTargetBeforeValueUpdate(float target) override;
     
 private:
   elapsedMillis triggerClock;
@@ -42,6 +46,12 @@ inline float IOTypeTrigger::processTarget(float target){
   }else if(target < 4095/2 && this->hasTriggered){
     this->hasTriggered = false;
   }
+
+  if(this->hasTriggered && this->triggerClock < 50){
+    target = 4095;
+  }else {
+    target = 0;
+  }
   
   return target;
 }
@@ -50,17 +60,17 @@ inline unsigned int IOTypeTrigger::processMidiCC(unsigned int value){
   return this->processTarget(value);
 }
 
-inline float IOTypeTrigger::processTargetBeforeValueUpdate(float target){
-  float newVal = 0;
-  
-  if(this->hasTriggered && this->triggerClock < 50){
-    newVal = 4095;
-  }else {
-    newVal = 0;
-  }
-
-  return newVal;
-}
+//inline float IOTypeTrigger::processTargetBeforeValueUpdate(float target){
+//  float newVal = 0;
+//  
+//  if(this->hasTriggered && this->triggerClock < 50){
+//    newVal = 4095;
+//  }else {
+//    newVal = 0;
+//  }
+//
+//  return newVal;
+//}
 
 inline void IOTypeTrigger::trigger(){
   this->triggerClock = 0;

@@ -3,6 +3,9 @@
 
 #include "IOType.h"
 
+/**
+ * CV input/output only limit values from 0 to 4095
+ */
 class IOTypeCV : public IOType
 {
 

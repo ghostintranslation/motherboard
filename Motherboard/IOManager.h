@@ -148,6 +148,16 @@ inline void IOManager::init(byte columnNumber)
     SPI.setDataMode(SPI_MODE0);
     SPI.setClockDivider(SPI_CLOCK_DIV2);
     SPI.begin();
+
+    for(unsigned int i = 0; i<IO::inputsSize; i++){
+      IO::getInputs()[i]->transitionTo(new IOStateDefault());
+    }
+    for(unsigned int i = 0; i<IO::outputsSize; i++){
+      IO::getOutputs()[i]->transitionTo(new IOStateDefault());
+    }
+    for(unsigned int i = 0; i<IO::ledsSize; i++){
+      IO::getLeds()[i]->transitionTo(new IOStateDefault());
+    }
 }
 
 /**
@@ -185,6 +195,19 @@ inline void IOManager::update()
         this->calibrationSequenceCurrentStep++;
         this->calibrationSequenceCurrentStep %= 5;
         this->calibrationSequenceClock = 0;
+
+        if(this->calibrationSequenceCurrentStep == 4){
+          // We switch now to calibrate mode
+          for(unsigned int i = 0; i<IO::inputsSize; i++){
+            IO::getInputs()[i]->transitionTo(new IOStateCalibrate);
+          }
+//          for(unsigned int i = 0; i<IO::outputsSize; i++){
+//            IO::getOutputs()[i]->transitionTo(new IOStateCalibrate());
+//          }
+//          for(unsigned int i = 0; i<IO::ledsSize; i++){
+//            IO::getLeds()[i]->transitionTo(new IOStateCalibrate());
+//          }
+        }
       }
       if(this->calibrationSequenceClock > this->calibrationSequenceClockMax){
         this->calibrationSequenceClock = 0;
@@ -203,6 +226,10 @@ inline void IOManager::update()
         this->calibrationSequenceCurrentStep = 0;
         for(unsigned int i = 0; i<IO::ledsSize; i++){
           IO::getLeds()[i]->set(Led::Status::Off, 0);
+        }
+        
+        for(unsigned int i = 0; i<IO::inputsSize; i++){
+          IO::getInputs()[i]->transitionTo(new IOStateDefault);
         }
       }
     }
@@ -487,9 +514,9 @@ inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber,
 }
 
 inline void IOManager::calibrate(){
+  Serial.println("IOManager::calibrate()");
   for(unsigned int i = 0; i<IO::inputsSize; i++){
     if(IO::getInputs()[i]->getClassName() == "InputPotentiometer"){
-      IO::getInputs()[i]->setCalibrate(true);
       
       if(IO::getInputs()[i]->getTarget() > IO::getInputs()[i]->getMin()){
         IO::getInputs()[i]->setMin(IO::getInputs()[i]->getTarget());
@@ -497,7 +524,6 @@ inline void IOManager::calibrate(){
       if(IO::getInputs()[i]->getTarget() < IO::getInputs()[i]->getMax()){
         IO::getInputs()[i]->setMax(IO::getInputs()[i]->getTarget());
       }
-      IO::getInputs()[i]->setCalibrate(false);
       
       Serial.printf("%d %d %d\n", i, IO::getInputs()[i]->getMin(), IO::getInputs()[i]->getMax());
     }

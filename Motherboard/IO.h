@@ -5,6 +5,7 @@
 #include "IOTypeGate.h"
 #include "IOTypeTrigger.h"
 #include "IOTypeCV.h"
+#include "IOState.h"
 
 // Forward declarations
 class PhysicalInput;
@@ -30,50 +31,48 @@ class IO : public AudioStream
 {
 public:
         IO(String name);
-        
         virtual void update(void);
-
-        void setCalibrate(bool calibrate);
-        
         unsigned int getMin();
-        
         unsigned int getMax();
-        
         void setMin(unsigned int min);
-        
         void setMax(unsigned int max);
-
         String getName();
-        
         virtual String getClassName(){return "";};
-    
         float getValue();
-
         virtual void setValue(float value);
-        
         float getTarget();
-        
         virtual void setTarget(float target);
-        
         void updateTarget();
-
         void setType(String type);
+        float getSmoothing();
+        void setSmoothing(float smoothing);
+        IOType* getType();
+        audio_block_t* receiveStream();
+        audio_block_t* allocateStream();
+        void transmitStream(audio_block_t* block);
+        void releaseStream(audio_block_t* block);
+        float getPreviousStreamValue();
+        void setPreviousStreamValue(float previousStreamValue);
+        unsigned int getUpdateMillis();
+        float getPreviousValue();
+        void setPreviousValue(float previousValue);
+        float getThresholdOnChange();
+        void setThresholdOnChange(float thresholdOnChange);
   
-        // Callbacks
+        // Callbacks  
+        virtual void onValueChange();
         void setOnChange(ChangeCallback changeCallback);
-    
         void setOnGateOpen(EdgeCallback gateOpenCallback);//onGateOn ?
-    
         void setOnGateClose(EdgeCallback gateCloseCallback);//onGateOff ?
 
         // MIDI
         void setMidiCC(byte controlNumber);
-
         int getMidiCC();
-
         virtual void onMidiCC(unsigned int value);
-
         void setMidiMode(MidiMode mode);
+
+        // State
+        void transitionTo(IOState* state);
         
     // Registrar
     static void registerInput(PhysicalInput* input);
@@ -92,15 +91,11 @@ public:
 private:
     audio_block_t *inputQueueArray[1];
 
-    bool calibrate = false;
-    
     IOType* ioType;
     
     // Regitrar
     static PhysicalInput** inputs;
-    
     static PhysicalOutput** outputs;
-    
     static Led** leds;
         
 protected:      
@@ -137,7 +132,6 @@ protected:
       
          EdgeCallback gateCloseCallback = nullptr;
           
-        virtual void onValueChange();
         
          elapsedMillis debounceTime = 0;
          unsigned int debounceDelay = 100;
@@ -148,6 +142,9 @@ protected:
          unsigned int midiValue = 0;
 
          MidiMode midiMode = Either;
+
+         // State
+         IOState* state;
 };
 
 
@@ -171,6 +168,8 @@ inline IO::IO(String name) : AudioStream(1, inputQueueArray)
   this->active = true;
 
   this->ioType = new IOTypeCV();
+
+  this->state = nullptr;
 }
 
 inline String IO::getName()
@@ -194,10 +193,10 @@ inline float IO::getTarget()
 
 inline void IO::setTarget(float target)
 {
-  if(this->calibrate){
-    this->target = target;
-    return;
-  }
+//  if(this->calibrate){
+//    this->target = target;
+//    return;
+//  }
   
   this->target = this->ioType->processTarget(target);
   this->updateTarget();
@@ -243,80 +242,9 @@ inline void IO::setMidiMode(MidiMode mode){
 
 inline void IO::update()
 { 
-  if(this->calibrate){
-    return;
+  if(this->state != nullptr){
+    this->state->update();
   }
-  
-    // Maybe alter the smoothing
-    this->smoothing = this->ioType->processSmoothing(this->smoothing);
-    
-    // Set the target from the input
-    audio_block_t *block;
-    uint32_t *p, *end;
-    unsigned int streamValue = 0;
- 
-    block = receiveReadOnly(0);
-    if (block){
-      streamValue = constrain(block->data[0], 0, 4095);
-      if(this->previousStreamValue != streamValue){
-        this->setTarget(streamValue); // TODO: instead of using one value and dropping the 127 others, drop 1
-        this->previousStreamValue  = streamValue;
-      }
-      release(block);
-    }
-
-    this->target = this->ioType->processTargetBeforeValueUpdate(this->target);
-    
-    // Update the value to reach the target
-    if (this->target != this->value)
-    {
-        if (this->smoothing == 1)
-        {
-            this->setValue(this->target);
-        }
-        else
-        {
-            this->setValue(this->value + (this->smoothing * (this->target - this->value) / 1024) / (100 / this->updateMillis));
-        }
-    }
-
-    // Rounding the float to compare to 0, because otherwise it is actually never quite 0
-    // and we don't need more than 2 decimal precision
-    this->setValue(roundf(this->value * 100) / 100);
-
-    // To eliminate noise
-    if (this->target > 5 && this->value == 0)
-    {
-        this->setValue(0);
-    }
-
-    // When value changes then call the callback.
-    // Only carring about changes greater than 1.
-    // This callback is defined in the Input class, and is empty in the Output class
-    if (abs(this->value - this->previousValue) > this->thresholdOnChange)
-    {
-        this->onValueChange();
-    }
-
-    this->previousValue = this->value;
-
-    block = allocate();
-    if (block){
-      p = (uint32_t *)(block->data);
-      end = p + AUDIO_BLOCK_SAMPLES/2;
-      do {
-        *p++ = this->value;
-        *p++ = this->value;
-        *p++ = this->value;
-        *p++ = this->value;
-        *p++ = this->value;
-        *p++ = this->value;
-        *p++ = this->value;
-        *p++ = this->value;
-      } while (p < end);
-      transmit(block, 0);
-      release(block);
-    }
 }
 
 inline void IO::onValueChange(){
@@ -436,8 +364,12 @@ inline void IO::onMidiCC(unsigned int value){
   }
 }
 
-inline void IO::setCalibrate(bool calibrate){
-  this->calibrate = calibrate;
+inline void IO::transitionTo(IOState* state){
+  if (this->state != nullptr){
+      delete this->state;
+  }
+  this->state = state;
+  this->state->setIO(this);
 }
 
 inline void IO::setMin(unsigned int min){
@@ -456,12 +388,72 @@ inline unsigned int IO::getMax(){
   return this->max;
 }
 
+
+inline float IO::getSmoothing(){
+  return this->smoothing;
+}
+
+inline void IO::setSmoothing(float smoothing){
+  this->smoothing = smoothing;
+}
+
+inline IOType* IO::getType(){
+  return this->ioType;
+}
+
+inline audio_block_t* IO::receiveStream(){
+  return this->receiveReadOnly(0);
+}
+
+inline audio_block_t* IO::allocateStream(){
+  return this->allocate();
+}
+
+inline void IO::transmitStream(audio_block_t* block){
+  return this->transmit(block, 0);
+}
+
+inline void IO::releaseStream(audio_block_t* block){
+  return this->release(block);
+}
+
+inline float IO::getPreviousValue(){
+  return this->previousValue;
+}
+
+inline void IO::setPreviousValue(float previousValue){
+  this->previousValue = previousValue;
+}
+
+inline float IO::getPreviousStreamValue(){
+  return this->previousStreamValue;
+}
+
+inline void IO::setPreviousStreamValue(float previousStreamValue){
+  this->previousStreamValue = previousStreamValue;
+}
+
+inline unsigned int IO::getUpdateMillis(){
+  return this->updateMillis;
+}
+
+inline float IO::getThresholdOnChange(){
+  return this->thresholdOnChange;
+}
+
+inline void IO::setThresholdOnChange(float thresholdOnChange){
+  this->thresholdOnChange = thresholdOnChange;
+}
+
 inline void IO::print()
 {
   Serial.print(this->name);
   Serial.print(": ");
   Serial.printf("%07.2f", this->value);
 }
+
+#include "IOStateDefault.h"
+#include "IOStateCalibrate.h"
 
 #define MidiMode MotherboardNamespace::MidiMode
 

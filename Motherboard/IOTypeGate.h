@@ -3,6 +3,9 @@
 
 #include "IOType.h"
 
+/**
+ * Gate inputs/outputs have only 2 values, 0 and 4095
+ */
 class IOTypeGate : public IOType
 {
 

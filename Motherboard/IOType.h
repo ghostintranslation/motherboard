@@ -3,6 +3,10 @@
 
 class IO; // Forward declaration
 
+/**
+ * Stratgy pattern here to process values differently 
+ * depending on the type of input
+ */
 class IOType
 {
 public:

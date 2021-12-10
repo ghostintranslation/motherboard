@@ -130,7 +130,7 @@ OutputJack* outputJack2 = new OutputJack(1, "outputJack1");
 
 
 
-//  Motherboard.setDebug(true);
+  Motherboard.setDebug(true);
   Motherboard.init("Motherboard", 2);
 
 
@@ -212,22 +212,6 @@ void onChangePot2(String name, float value, float diffToPrevious){
 //amp.gain(map(value,0,4095,0,2));
   sine->frequency(map(value,0,4095,0,20));
 //Serial.println("onChangePot2");
-}
-void onChangePot3(byte inputIndex, float value, float diffToPrevious){
-//  float mapped = map(value,0,4095,0,1000);
-//  waveform2.frequency(mapped);
-//  Motherboard.setLED(1, MotherboardNamespace::Led::Status::On, value);
-}
-void onChangePot4(byte inputIndex, float value, float diffToPrevious){
-//  float mapped = map(value,0,4095,0,0.05);
-//  Serial.println(mapped);
-//  waveform2.amplitude(mapped);
-}
-
-void onVelocityChange(byte inputIndex, float value, float diffToPrevious){
-//  float gainValue = map(value, 0, 4095, 0, 1);
-//  getInstance()->voices[0]->getOutput()->gain(1, gainValue);
-//  Motherboard.setLED(0, MotherboardNamespace::Led::Status::On, value);
 }
 
 void onChangeQuantized(byte inputIndex, int note){
