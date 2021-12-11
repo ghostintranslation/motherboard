@@ -13,7 +13,6 @@ public:
 };
 
 inline OutputJack::OutputJack(int index, String name):PhysicalOutput{index, name}{
-  IO::registerOutput(this);
 }
 
 #define OutputJack MotherboardNamespace::OutputJack

@@ -1,9 +1,10 @@
 #ifndef Led_h
 #define Led_h
 
+#include "Registrar.h"
 #include "PhysicalOutput.h"
 
-class Led : public PhysicalIO
+class Led : public PhysicalIO, public Registrar<Led>
 {
 
 public:
@@ -38,7 +39,7 @@ private:
 };
 
 inline Led::Led(int index):PhysicalIO{index, (String)"Led" + index}{
-  IO::registerLed(this);
+//  IORegistrar::registerLed(this);
 }
 
 inline void Led::set(Status status, int brightness)

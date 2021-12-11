@@ -219,21 +219,21 @@ inline void MidiManager::handleMidiControlChange(byte channel, byte control, byt
   // If the incoming message's channel corresponds to the board's channel 
   if(getInstance()->midiChannel == channel){
     
-    for(unsigned int i = 0; i< IO::inputsSize; i++){
-      if(IO::getInputs()[i]->getMidiCC() == control){
-        IO::getInputs()[i]->onMidiCC(val);
+    for(unsigned int i = 0; i< PhysicalInput::getCount(); i++){
+      if(PhysicalInput::getEntities()[i]->getMidiCC() == control){
+        PhysicalInput::getEntities()[i]->onMidiCC(val);
       }
     }
 
-    for(unsigned int i = 0; i< IO::outputsSize; i++){
-      if(IO::getOutputs()[i]->getMidiCC() == control){
-        IO::getOutputs()[i]->onMidiCC(val);
+    for(unsigned int i = 0; i< PhysicalOutput::getCount(); i++){
+      if(PhysicalOutput::getEntities()[i]->getMidiCC() == control){
+        PhysicalOutput::getEntities()[i]->onMidiCC(val);
       }
     }
 
-    for(unsigned int i = 0; i< IO::ledsSize; i++){
-      if(IO::getLeds()[i]->getMidiCC() == control){
-        IO::getLeds()[i]->onMidiCC(val);
+    for(unsigned int i = 0; i< Led::getCount(); i++){
+      if(Led::getEntities()[i]->getMidiCC() == control){
+        Led::getEntities()[i]->onMidiCC(val);
       }
     }
     

@@ -8,9 +8,9 @@
 #include "IOState.h"
 
 // Forward declarations
-class PhysicalInput;
-class PhysicalOutput;
-class Led;
+//class PhysicalInput;
+//class PhysicalOutput;
+//class Led;
 
 enum MidiMode
 {
@@ -75,15 +75,6 @@ public:
         void transitionTo(IOState* state);
         
     // Registrar
-    static void registerInput(PhysicalInput* input);
-    static void registerOutput(PhysicalOutput* output);
-    static void registerLed(Led* led);
-    static PhysicalInput** getInputs();
-    static PhysicalOutput** getOutputs();
-    static Led** getLeds();
-    static unsigned int inputsSize;
-    static unsigned int outputsSize;
-    static unsigned int ledsSize;
 
     // Debug
     virtual void print();
@@ -93,10 +84,6 @@ private:
 
     IOType* ioType;
     
-    // Regitrar
-    static PhysicalInput** inputs;
-    static PhysicalOutput** outputs;
-    static Led** leds;
         
 protected:      
         String name = "";
@@ -148,15 +135,6 @@ protected:
 };
 
 
-// Must initialize
-unsigned int IO::inputsSize = 0;
-PhysicalInput** IO::inputs = new PhysicalInput*[0];
-    
-unsigned int IO::outputsSize = 0;
-PhysicalOutput** IO::outputs = new PhysicalOutput*[0];
-    
-unsigned int IO::ledsSize = 0;
-Led** IO::leds = new Led*[0];
 
 
 inline IO::IO(String name) : AudioStream(1, inputQueueArray)
@@ -296,55 +274,6 @@ inline void IO::setOnGateClose(EdgeCallback gateCloseCallback)
 {
     this->gateCloseCallback = gateCloseCallback;
 }
-
-inline void IO::registerInput(PhysicalInput* input){
-  PhysicalInput** newArr = new PhysicalInput*[inputsSize + 1];
-  std::copy(inputs, inputs + std::min(inputsSize, inputsSize + 1), newArr); // TODO: Not sure if this is better than the loop
-//  for (int i = 0; i < inputsSize; i++)
-//  {
-//      newArr[i] = inputs[i];
-//  }
-  delete []inputs;
-  inputs = newArr;
-  newArr = NULL;
-
-  inputs[inputsSize] = input;
-  inputsSize++;
-}
-
-inline void IO::registerOutput(PhysicalOutput* output){
-  PhysicalOutput** newArr = new PhysicalOutput*[outputsSize + 1];
-  std::copy(outputs, outputs + std::min(outputsSize, outputsSize + 1), newArr);
-  delete[] outputs;
-  outputs = newArr;
-
-  outputs[outputsSize] = output;
-  
-  outputsSize++; 
-}
-
-inline void IO::registerLed(Led* led){
-  Led** newArr = new Led*[ledsSize + 1];
-  std::copy(leds, leds + std::min(ledsSize, ledsSize + 1), newArr);
-  delete[] leds;
-  leds = newArr;
-
-  leds[ledsSize] = led;
-  
-  ledsSize++; 
-}
-
-inline PhysicalInput** IO::getInputs(){
-  return inputs;
-};
-
-inline PhysicalOutput** IO::getOutputs(){
-  return outputs;
-};
-
-inline Led** IO::getLeds(){
-  return leds;
-};
 
 inline void IO::setMidiCC(byte controlNumber){
   this->midiControlNumber = controlNumber;

@@ -1,9 +1,10 @@
 #ifndef PhysicalInput_h
 #define PhysicalInput_h
 
+#include "Registrar.h"
 #include "PhysicalIO.h"
 
-class PhysicalInput : public PhysicalIO
+class PhysicalInput : public PhysicalIO, public Registrar<PhysicalInput>
 {
 public:
     PhysicalInput(int index, String name);
@@ -38,7 +39,7 @@ protected:
 inline PhysicalInput::PhysicalInput(int index, String name):PhysicalIO{index, name}
 {
   this->pin = ANALOG_IN_1_PIN; // TODO: DO IT ACCORDING TO INDEX
-  IO::registerInput(this);
+//  IORegistrar::registerInput(this);
 }
 
 

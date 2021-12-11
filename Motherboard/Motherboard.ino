@@ -20,10 +20,14 @@ https://github.com/ghostintranslation
  * This is an example sketch
  */
 
+
 #include <Audio.h>
 #include "Motherboard.h"
 
+//#include "Test.h"
+
 AudioOutputI2S           i2s1; 
+OutputJack* outputJack2;
 //InputPotentiometer pot1(0, "pot1");
 //InputPotentiometer pot2(1, "pot2");
 //InputPotentiometer pot3(2, "pot3");
@@ -59,12 +63,27 @@ AudioOutputI2S           i2s1;
 //AudioConnection          patchCord2(waveform2, 0, i2s1, 1);
 //AudioControlSGTL5000     audioboard;     //xy=239,232
 AudioSynthWaveformModulated* sine;
+
+
+
 void setup()
 {
   Serial.begin(115200);
 
   // Wait for serial monitor
   while (!Serial && millis() < 2500); 
+
+//  Test* test = new Test("test1");
+//  Test* test2 = new Test("test2");
+//  Test* test3 = new Test("test3");
+//
+//  for(int i=0; i<Test::getCount(); i++){
+//   Serial.println(Test::getEntities()[i]->getName());
+//  }
+//
+//  for(Test* t : Test::getEntities()){
+//   Serial.println(t->getName());
+//  }
 
    // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
@@ -103,12 +122,12 @@ void setup()
 //  pot2->setOnChange(onChangePot2);
 
 OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
-OutputJack* outputJack2 = new OutputJack(1, "outputJack1");
+outputJack2 = new OutputJack(1, "outputJack1");
 
-  AudioConnection* patchCord1 = new AudioConnection(*pot1, 0, *outputJack1, 0);
+//  AudioConnection* patchCord1 = new AudioConnection(*pot1, 0, *outputJack1, 0);
 //  AudioConnection* patchCord2 = new AudioConnection(*pot2, 0, *outputJack2, 0);
-  AudioConnection* patchCord3 = new AudioConnection(*outputJack1, 0, *led1, 0);
-//  AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
+  AudioConnection* patchCord3 = new AudioConnection(*pot1, 0, *led1, 0);
+  AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
 
 //  TODO: Virtual IOs
 //  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
@@ -159,15 +178,11 @@ void loop()
 //  Serial.println(customStream1.getValue());
   Motherboard.update();
 
-
-//  if(timeOut%50 == 0){
-//    outValue++;
-//    outValue = outValue % 4095;
-//    out->setTarget(outValue);
-//    out3->setTarget(outValue);
-//    out5->setTarget(outValue);
-//    out7->setTarget(outValue);
-//  }
+  if(timeOut%100 == 0){
+    outValue++;
+    outValue = outValue % 4095;
+    outputJack2->setTarget(outValue);
+  }
 //
 //  if(timeOut%150 == 0){
 //    outValue2++;
