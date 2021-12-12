@@ -112,6 +112,11 @@ void setup()
   Led* led2 = new Led(1);
 //  led2->setMidiCC(0); // CC number, the channel is the board one
 
+
+  InputMidiNote* inputMidiNote1 = new InputMidiNote("inputMidiNote1", 1);
+  inputMidiNote1->setHandleMidiNoteOn(noteOnCallback);
+  inputMidiNote1->setHandleMidiNoteOff(noteOffCallback);
+  
   InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
 //pot1->setType("Gate");
 //  pot1->setMidiCC(1); // CC number, the channel is the board one
@@ -122,9 +127,11 @@ void setup()
 //  pot2->setOnChange(onChangePot2);
 
 OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
-outputJack2 = new OutputJack(1, "outputJack1");
+outputJack1->setSmoothing(1);
 
-//  AudioConnection* patchCord1 = new AudioConnection(*pot1, 0, *outputJack1, 0);
+outputJack2 = new OutputJack(1, "outputJack2");
+
+  AudioConnection* patchCord1 = new AudioConnection(*inputMidiNote1, 0, *outputJack1, 0);
 //  AudioConnection* patchCord2 = new AudioConnection(*pot2, 0, *outputJack2, 0);
   AudioConnection* patchCord3 = new AudioConnection(*pot1, 0, *led1, 0);
   AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
@@ -249,6 +256,15 @@ void onGateClose(String name){
 }
 
 void noteOnCallback(byte channel, byte note, byte velocity){
+  Serial.print("noteOnCallback: ");
+  Serial.print(channel);
+  Serial.print(" ");
+  Serial.print(note);
+  Serial.print(" ");
+  Serial.println(velocity);
+}
+void noteOffCallback(byte channel, byte note, byte velocity){
+  Serial.print("noteOffCallback: ");
   Serial.print(channel);
   Serial.print(" ");
   Serial.print(note);

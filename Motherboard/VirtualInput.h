@@ -1,7 +1,7 @@
 #ifndef VirtualInput_h
 #define VirtualInput_h
 
-#include "IO.h"
+#include "VirtualIO.h"
 
 class VirtualInput : public VirtualIO
 {

@@ -24,6 +24,7 @@ using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 
 //#include "IORegistrar.h"
 #include "InputPotentiometer.h"
+#include "InputMidiNote.h"
 #include "OutputJack.h"
 #include "Led.h"
 

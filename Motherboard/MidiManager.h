@@ -5,9 +5,9 @@
 //#include <vector>
 #include <MIDI.h>
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
-
-using MidiNoteOnCallback = void (*)(byte channel, byte note, byte velocity);
-using MidiNoteOffCallback = void (*)(byte channel, byte note, byte velocity);
+//
+//using MidiNoteOnCallback = void (*)(byte channel, byte note, byte velocity);
+//using MidiNoteOffCallback = void (*)(byte channel, byte note, byte velocity);
 using GlobalMidiControlChangeCallback = void (*)(byte, byte, byte);
 using MidiSysExCallback = void (*)(const uint8_t*, uint16_t, bool);
 using MidiControlChangeCallbackFunction = void (*)(byte, byte, byte); //channel, control, value
@@ -28,8 +28,8 @@ public:
     void sendSysEx(uint32_t length, const uint8_t *data, bool hasTerm=false);
     void setMidiChannel(byte channel);
     byte getMidiChannel();
-    void setHandleMidiNoteOn(MidiNoteOnCallback fptr);
-    void setHandleMidiNoteOff(MidiNoteOffCallback fptr);
+//    void setHandleMidiNoteOn(MidiNoteOnCallback fptr);
+//    void setHandleMidiNoteOff(MidiNoteOffCallback fptr);
 //    void setHandleGlobalMidiControlChange(GlobalMidiControlChangeCallback fptr);
     void setHandleMidiControlChange(byte control, String controlName, MidiControlChangeCallbackFunction fptr);
     void setHandleMidiControlChange(byte midiChannel, byte midiCC, String controlName, MidiControlChangeCallbackFunction fptr);
@@ -59,8 +59,8 @@ private:
     byte midiChannel = 1; // 1 to 16
 
     // Callbacks
-    MidiNoteOnCallback midiNoteOnCallback = nullptr;
-    MidiNoteOffCallback midiNoteOffCallback = nullptr;
+//    MidiNoteOnCallback midiNoteOnCallback = nullptr;
+//    MidiNoteOffCallback midiNoteOffCallback = nullptr;
     GlobalMidiControlChangeCallback globalMidiControlChangeCallback = nullptr;
     MidiSysExCallback midiSysExCallback = nullptr;
     // Storing the MIDI CC callbacks in a map with keys pairs representing the MIDI channel and MIDI control number
@@ -71,6 +71,9 @@ private:
     // Handle MIDI
     static void handleMidiSysEx(const uint8_t* data, uint16_t length, bool last);
     static void handleMidiControlChange(byte channel, byte control, byte value);  
+    static void handleMidiNoteOn(byte channel, byte note, byte velocity);
+    static void handleMidiNoteOff(byte channel, byte note, byte velocity);
+    static void handleMidiNote(byte channel, byte note, byte velocity, bool noteOn);
 };
 
 
@@ -98,10 +101,10 @@ inline void MidiManager::init()
 {
   MIDI.setHandleControlChange(this->handleMidiControlChange);
   usbMIDI.setHandleControlChange(this->handleMidiControlChange);
-  MIDI.setHandleNoteOn(this->midiNoteOnCallback);
-  usbMIDI.setHandleNoteOn(this->midiNoteOnCallback);
-  MIDI.setHandleNoteOff(this->midiNoteOffCallback);
-  usbMIDI.setHandleNoteOff(this->midiNoteOffCallback);
+  MIDI.setHandleNoteOn(this->handleMidiNoteOn);
+  usbMIDI.setHandleNoteOn(this->handleMidiNoteOn);
+  MIDI.setHandleNoteOff(this->handleMidiNoteOff);
+  usbMIDI.setHandleNoteOff(this->handleMidiNoteOff);
 //   usbMIDI.setHandleSystemExclusive(this->handleMidiSysEx);
 
   Serial1.begin(31250, SERIAL_8N1_RXINV);
@@ -136,20 +139,20 @@ inline byte MidiManager::getMidiChannel(){
 /**
  * Handle MIDI note on
  */
- inline void MidiManager::setHandleMidiNoteOn(MidiNoteOnCallback fptr){
-   this->midiNoteOnCallback = fptr;
-   MIDI.setHandleNoteOn(fptr);
-   usbMIDI.setHandleNoteOn(fptr);
- }
+// inline void MidiManager::setHandleMidiNoteOn(MidiNoteOnCallback fptr){
+//   this->midiNoteOnCallback = fptr;
+//   MIDI.setHandleNoteOn(fptr);
+//   usbMIDI.setHandleNoteOn(fptr);
+// }
 
 /**
  * Handle MIDI note off
  */
- inline void MidiManager::setHandleMidiNoteOff(MidiNoteOffCallback fptr){
-   this->midiNoteOffCallback = fptr;
-   MIDI.setHandleNoteOff(fptr);
-   usbMIDI.setHandleNoteOff(fptr);
-}
+// inline void MidiManager::setHandleMidiNoteOff(MidiNoteOffCallback fptr){
+//   this->midiNoteOffCallback = fptr;
+//   MIDI.setHandleNoteOff(fptr);
+//   usbMIDI.setHandleNoteOff(fptr);
+//}
 
 /**
  * Handle MIDI control change
@@ -261,6 +264,34 @@ inline void MidiManager::handleMidiControlChange(byte channel, byte control, byt
   // Triggering the global callback
   if(MidiManager::getInstance()->globalMidiControlChangeCallback != nullptr){
     MidiManager::getInstance()->globalMidiControlChangeCallback(channel, control, value);
+  }
+}
+
+
+inline void MidiManager::handleMidiNoteOn(byte channel, byte note, byte velocity){
+  MidiManager::handleMidiNote(channel, note, velocity, true);
+}
+
+inline void MidiManager::handleMidiNoteOff(byte channel, byte note, byte velocity){
+  MidiManager::handleMidiNote(channel, note, velocity, false);
+}
+
+inline void MidiManager::handleMidiNote(byte channel, byte note, byte velocity, bool isNoteOn){
+  // Internal midi channel is from 1 to 16
+  // Incoming channel is from 1 to 16
+  // Callbacks channel is from 0 to 16, 0 meaning bounded with internal midi channel
+
+  // Calling any InputMidiNote on the same channel
+  // or any input on channel 0 with incomming message'schannel matching the board's channel
+  for(unsigned int i = 0; i< InputMidiNote::getCount(); i++){
+    if(InputMidiNote::getEntities()[i]->getChannel() == channel
+      || (InputMidiNote::getEntities()[i]->getChannel() == 0 && getInstance()->midiChannel == channel)){
+      if(isNoteOn){
+        InputMidiNote::getEntities()[i]->onMidiNoteOn(note, velocity);
+      }else{
+        InputMidiNote::getEntities()[i]->onMidiNoteOff(note, velocity);
+      }
+    }
   }
 }
 
