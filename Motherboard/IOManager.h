@@ -11,6 +11,10 @@
 #define SPI_MOSI_PIN 11
 #define ANALOG_IN_1_PIN 14
 
+#define ANALOG_RESOLUTION 12
+#define ABSOLUTE_ANALOG_MIN 0
+#define ABSOLUTE_ANALOG_MAX 4095
+
 
 // Callback types
 //using TriggerDownCallback = void (*)(byte);
@@ -24,6 +28,7 @@ using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 
 //#include "IORegistrar.h"
 #include "InputPotentiometer.h"
+#include "InputJack.h"
 #include "InputMidiNote.h"
 #include "OutputJack.h"
 #include "Led.h"
@@ -41,13 +46,13 @@ public:
     // Debug
     void print();
 
-    float getInputValue(byte index);
+//    float getInputValue(byte index);
 //    float getOutputValue(byte index);
 //    void setOutputValue(byte index, unsigned int value);
 //    void setLED(byte index, Led::Status status, unsigned int brightness);
 //    void setSmoothing(byte smoothing);
-    unsigned int getAnalogMaxValue();
-    unsigned int getAnalogMinValue();
+//    unsigned int getAnalogMaxValue();
+//    unsigned int getAnalogMinValue();
     byte getDipswitchValue();
 
     
@@ -77,12 +82,11 @@ private:
     byte maxIoNumber = 0;
     byte currentInputIndex = 0;
     byte currentOutputIndex = 0;
-    byte analogResolution = 12;
     byte dipswitchValue = 0;
     void iterateIO();
     void readWriteIO();
     
-    static void handleMidiControlChange(byte channel, byte controlNumber, byte value);
+//    static void handleMidiControlChange(byte channel, byte controlNumber, byte value);
 
     // Calibration
     byte calibrationSequenceSteps[4]= {15, 7, 15, 7};
@@ -100,8 +104,6 @@ private:
     // PWM clock
     const float intervalPWM = 20000;
     elapsedMicros clockPWM;
-    
-    // Regitrar
 };
 
 // Instance pre init
@@ -139,7 +141,7 @@ inline void IOManager::init(byte columnNumber)
     pinMode(SPI_CLOCK_PIN, OUTPUT);
     pinMode(SPI_MOSI_PIN, OUTPUT);
 
-    analogReadResolution(getInstance()->analogResolution);
+    analogReadResolution(ANALOG_RESOLUTION);
 
     SPI.setBitOrder(MSBFIRST);
     SPI.setDataMode(SPI_MODE0);
@@ -155,13 +157,13 @@ inline void IOManager::init(byte columnNumber)
 //    for(unsigned int i = 0; i<IORegistrar::ledsSize; i++){
 //      IORegistrar::getLeds()[i]->transitionTo(new IOStateDefault());
 //    }
-    for(PhysicalInput* i : PhysicalInput::getEntities()){
+    for(PhysicalInput* i : PhysicalInput::getAll()){
       i->transitionTo(new IOStateDefault());
     }
-    for(PhysicalOutput* i : PhysicalOutput::getEntities()){
+    for(PhysicalOutput* i : PhysicalOutput::getAll()){
       i->transitionTo(new IOStateDefault());
     }
-    for(Led* i : Led::getEntities()){
+    for(Led* i : Led::getAll()){
       i->transitionTo(new IOStateDefault());
     }
 }
@@ -211,7 +213,7 @@ inline void IOManager::update()
 //            IORegistrar::getInputs()[i]->transitionTo(new IOStateCalibrate);
 //          }
 
-          for(PhysicalInput* i : PhysicalInput::getEntities()){
+          for(PhysicalInput* i : PhysicalInput::getAll()){
             i->transitionTo(new IOStateCalibrate());
           }
 
@@ -231,8 +233,8 @@ inline void IOManager::update()
 //      for(unsigned int i = 0; i<IORegistrar::ledsSize; i++){
 //        IORegistrar::getLeds()[i]->set(Led::Status::Blink, 4095);
 //      }
-          for(Led* i : Led::getEntities()){
-            i->set(Led::Status::Blink, 4095);
+          for(Led* i : Led::getAll()){
+            i->set(Led::Status::Blink, ABSOLUTE_ANALOG_MAX);
           }
 
       this->calibrate();
@@ -244,14 +246,14 @@ inline void IOManager::update()
 //        for(unsigned int i = 0; i<IORegistrar::ledsSize; i++){
 //          IORegistrar::getLeds()[i]->set(Led::Status::Off, 0);
 //        }
-          for(Led* i : Led::getEntities()){
+          for(Led* i : Led::getAll()){
             i->set(Led::Status::Off, 0);
           }
         
 //        for(unsigned int i = 0; i<IORegistrar::inputsSize; i++){
 //          IORegistrar::getInputs()[i]->transitionTo(new IOStateDefault);
 //        }
-          for(PhysicalInput* i : PhysicalInput::getEntities()){
+          for(PhysicalInput* i : PhysicalInput::getAll()){
             i->transitionTo(new IOStateDefault());
           }
       }
@@ -273,7 +275,7 @@ inline void IOManager::iterateIO()
 
     // If current input Position is greater than the allowed max
     // then iterate again. This way we skip useless Inputs.
-    }while(PhysicalInput::getEntities()[this->currentInputIndex]->getIndex() > this->maxIoNumber);
+    }while(PhysicalInput::getAll()[this->currentInputIndex]->getIndex() > this->maxIoNumber);
   }
 
 //  if(IORegistrar::outputsSize > 0){
@@ -285,7 +287,7 @@ inline void IOManager::iterateIO()
 
     // If current input Position is greater than the allowed max
     // then iterate again. This way we skip useless Inputs.
-    }while(PhysicalOutput::getEntities()[this->currentOutputIndex]->getIndex() > this->maxIoNumber);
+    }while(PhysicalOutput::getAll()[this->currentOutputIndex]->getIndex() > this->maxIoNumber);
   }
 }
 
@@ -307,9 +309,9 @@ inline void IOManager::readWriteIO()
    * - Set the latch to high  (shift registers actually set their pins and stop listening)
    */
    
-    unsigned int currentInputPosition = PhysicalInput::getCount() > this->currentInputIndex ? PhysicalInput::getEntities()[this->currentInputIndex]->getIndex() : 0;
+    unsigned int currentInputPosition = PhysicalInput::getCount() > this->currentInputIndex ? PhysicalInput::getAll()[this->currentInputIndex]->getIndex() : 0;
     
-    unsigned int currentOutputPosition = PhysicalOutput::getCount() > this->currentOutputIndex ? PhysicalOutput::getEntities()[this->currentOutputIndex]->getIndex() : 0;
+    unsigned int currentOutputPosition = PhysicalOutput::getCount() > this->currentOutputIndex ? PhysicalOutput::getAll()[this->currentOutputIndex]->getIndex() : 0;
 
     byte currentOutputDacIndex = currentOutputPosition / 2;
     byte currentOutputDacChannel = currentOutputPosition % 2;
@@ -319,7 +321,7 @@ inline void IOManager::readWriteIO()
 
     // Preparing the shift register data
     unsigned long shiftRegistersData =  0x00;
-    if (PhysicalInput::getCount() > this->currentInputIndex && PhysicalInput::getEntities()[this->currentInputIndex]->isDirectToTeensy())
+    if (PhysicalInput::getCount() > this->currentInputIndex && PhysicalInput::getAll()[this->currentInputIndex]->isDirectToTeensy())
     {
         shiftRegistersData = 0x80;
     }
@@ -331,17 +333,17 @@ inline void IOManager::readWriteIO()
     // Preparing the LEDs data
     if(Led::getCount() > 0){
       for(unsigned int i = 0; i<Led::getCount(); i++){
-        if (Led::getEntities()[i]->getValue() == 0)
+        if (Led::getAll()[i]->getValue() == ABSOLUTE_ANALOG_MIN)
         {
             continue;
         }
-        else if (Led::getEntities()[i]->getValue() == 4095)
+        else if (Led::getAll()[i]->getValue() == ABSOLUTE_ANALOG_MAX)
         {
-            bitSet(ledsData, Led::getEntities()[i]->getIndex());
+            bitSet(ledsData, Led::getAll()[i]->getIndex());
         }
-        else if ((float)this->clockPWM / this->intervalPWM < (float)Led::getEntities()[i]->getValue() / 4095)
+        else if ((float)this->clockPWM / this->intervalPWM < (float)Led::getAll()[i]->getValue() / ABSOLUTE_ANALOG_MAX)
         {
-            bitSet(ledsData, Led::getEntities()[i]->getIndex());
+            bitSet(ledsData, Led::getAll()[i]->getIndex());
         }
       }
     }
@@ -362,14 +364,14 @@ inline void IOManager::readWriteIO()
       {
           // Channel A
           SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-          SPI.transfer16(0x1000 | constrain((int)PhysicalOutput::getEntities()[this->currentOutputIndex]->getValue(), 0, 4095));
+          SPI.transfer16(0x1000 | constrain((int)PhysicalOutput::getAll()[this->currentOutputIndex]->getValue(), ABSOLUTE_ANALOG_MIN, ABSOLUTE_ANALOG_MAX)); // TODO: do we need the constrain here? not done earlier already?
           SPI.endTransaction();
       }
       else
       {
           // Channel B
           SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-          SPI.transfer16(0x9000 | (int)PhysicalOutput::getEntities()[this->currentOutputIndex]->getValue());
+          SPI.transfer16(0x9000 | (int)PhysicalOutput::getAll()[this->currentOutputIndex]->getValue());
           SPI.endTransaction();
       }
     }
@@ -388,7 +390,7 @@ inline void IOManager::readWriteIO()
 
     // Read the current input
     if(PhysicalInput::getCount() > this->currentInputIndex){
-      PhysicalInput::getEntities()[this->currentInputIndex]->read();
+      PhysicalInput::getAll()[this->currentInputIndex]->read();
     }
 
     // Read the dipswitch
@@ -484,14 +486,14 @@ inline void IOManager::readWriteIO()
  * Get input value
  * @param byte index The index of the input
  */
-inline float IOManager::getInputValue(byte index)
-{
+//inline float IOManager::getInputValue(byte index)
+//{
 //  if(IO::getInputs().size() > 0 && index < IO::getInputs().size()){
 //    return IO::getInputs()[index]->getValue();
 //  }else{
-    return 0;
+//    return 0;
 //  }
-}
+//}
 
 /**
  * Get output value
@@ -514,20 +516,20 @@ inline byte IOManager::getDipswitchValue()
 /**
  * Get min analog value according to resolution
  */
-inline unsigned int IOManager::getAnalogMinValue()
-{
-    return 0;
-}
+//inline unsigned int IOManager::getAnalogMinValue()
+//{
+//    return 0;
+//}
+//
+///**
+// * Get max analog value according to resolution
+// */
+//inline unsigned int IOManager::getAnalogMaxValue()
+//{
+//    return (1 << this->analogResolution) - 1;
+//}
 
-/**
- * Get max analog value according to resolution
- */
-inline unsigned int IOManager::getAnalogMaxValue()
-{
-    return (1 << this->analogResolution) - 1;
-}
-
-inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber, byte value){
+//inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber, byte value){
   //TODO: use the channel
   
 //    for(APhysicalInput* i : IO::getInputs()){
@@ -536,21 +538,21 @@ inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber,
 //          i->setTarget(target);
 //        }
 //    }
-}
+//}
 
 inline void IOManager::calibrate(){
   Serial.println("IOManager::calibrate()");
   for(unsigned int i = 0; i<PhysicalInput::getCount(); i++){
-    if(PhysicalInput::getEntities()[i]->getClassName() == "InputPotentiometer"){
+    if(PhysicalInput::getAll()[i]->getClassName() == "InputPotentiometer"){
       
-      if(PhysicalInput::getEntities()[i]->getTarget() > PhysicalInput::getEntities()[i]->getMin()){
-        PhysicalInput::getEntities()[i]->setMin(PhysicalInput::getEntities()[i]->getTarget());
+      if(PhysicalInput::getAll()[i]->getTarget() > PhysicalInput::getAll()[i]->getMin()){
+        PhysicalInput::getAll()[i]->setMin(PhysicalInput::getAll()[i]->getTarget());
       }
-      if(PhysicalInput::getEntities()[i]->getTarget() < PhysicalInput::getEntities()[i]->getMax()){
-        PhysicalInput::getEntities()[i]->setMax(PhysicalInput::getEntities()[i]->getTarget());
+      if(PhysicalInput::getAll()[i]->getTarget() < PhysicalInput::getAll()[i]->getMax()){
+        PhysicalInput::getAll()[i]->setMax(PhysicalInput::getAll()[i]->getTarget());
       }
       
-      Serial.printf("%d %d %d\n", i, PhysicalInput::getEntities()[i]->getMin(), PhysicalInput::getEntities()[i]->getMax());
+      Serial.printf("%d %d %d\n", i, PhysicalInput::getAll()[i]->getMin(), PhysicalInput::getAll()[i]->getMax());
     }
   }
 
@@ -561,14 +563,14 @@ inline void IOManager::calibrate(){
 inline void IOManager::print(){
   Serial.print("Inputs: ");
   for(unsigned int i = 0; i< PhysicalInput::getCount(); i++){
-    PhysicalInput::getEntities()[i]->print();
+    PhysicalInput::getAll()[i]->print();
     Serial.print(" / ");
   }
   Serial.println("");
 
   Serial.print("Outputs: ");
   for(unsigned int i = 0; i< PhysicalOutput::getCount(); i++){
-    PhysicalOutput::getEntities()[i]->print();
+    PhysicalOutput::getAll()[i]->print();
     Serial.print(" / ");
   }
 
@@ -576,7 +578,7 @@ inline void IOManager::print(){
   
   Serial.print("Leds: ");
   for(unsigned int i = 0; i< Led::getCount(); i++){
-    Led::getEntities()[i]->print();
+    Led::getAll()[i]->print();
     Serial.print(" / ");
   }
   

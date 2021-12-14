@@ -39,7 +39,7 @@ public:
 //  void toggleLED(byte index);
 //  void resetAllLED();
   void initSequence();
-  float getInputValue(byte index);
+//  float getInputValue(byte index);
 //  void setOutput(byte index, unsigned int value);
 //  void setSmoothing(byte smoothing);
   int getAnalogMaxValue();
@@ -165,26 +165,26 @@ inline void Motherboard::update()
  * Get input value
  * @param byte index The index of the input
  */
-inline float Motherboard::getInputValue(byte index)
-{
-  return ioManager->getInputValue(index);
-}
+//inline float Motherboard::getInputValue(byte index)
+//{
+//  return ioManager->getInputValue(index);
+//}
 
 /**
  * Get max analog value according to resolution
  */
-inline int Motherboard::getAnalogMinValue()
-{
-  return ioManager->getAnalogMinValue();
-}
+//inline int Motherboard::getAnalogMinValue()
+//{
+//  return ioManager->getAnalogMinValue();
+//}
 
 /**
  * Get max analog value according to resolution
  */
-inline int Motherboard::getAnalogMaxValue()
-{
-    return ioManager->getAnalogMaxValue();
-}
+//inline int Motherboard::getAnalogMaxValue()
+//{
+//    return ioManager->getAnalogMaxValue();
+//}
 
 //inline byte Motherboard::getMidiChannel()
 //{

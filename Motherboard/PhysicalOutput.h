@@ -4,6 +4,7 @@
 #include "Registrar.h"
 #include "PhysicalIO.h"
 
+// TODO: SET THE NUMBER OF STREAM OUTPUTS to 0
 class PhysicalOutput : public PhysicalIO, public Registrar<PhysicalOutput>
 {
 public:

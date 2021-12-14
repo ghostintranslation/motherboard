@@ -27,41 +27,7 @@ https://github.com/ghostintranslation
 //#include "Test.h"
 
 AudioOutputI2S           i2s1; 
-OutputJack* outputJack2;
-//InputPotentiometer pot1(0, "pot1");
-//InputPotentiometer pot2(1, "pot2");
-//InputPotentiometer pot3(2, "pot3");
-//InputPotentiometer pot4(3, "pot4");
-//InputPotentiometer pot5(4, "pot5");
-//InputPotentiometer pot6(5, "pot6");
-//OutputDac dac1(0, "dac1");
-//Led led1(0);
-//Led led2(1);
-//AudioSynthWaveformModulated sine;
-//AudioMixer4 mixer;
-//AudioConnection     patchCord1(pot1, 0, mixer, 0);
-//AudioConnection     patchCord2(pot2, 0, mixer, 1);
-//AudioConnection     patchCord3(pot3, 0, mixer, 2);
-//AudioConnection     patchCord4(pot4, 0, mixer, 3);
-//AudioConnection     patchCord5(mixer, 0, dac1, 0);
-//AudioConnection     patchCord6(mixer, 0, led1, 0);
-//AudioConnection     patchCord7(sine, 0, led2, 0);
-
-//AudioSynthWaveformModulated sine;
-//AudioConnection     patchCord1(pot1, 0, amp, 0);
-//AudioConnection     patchCord2(amp, 0, sine, 0);
-//AudioConnection     patchCord3(pot2, 0, sine, 1);
-//AudioConnection     patchCord3(sine, 0, dac1, 0);
-//AudioConnection     patchCord4(sine, 0, i2s1, 0);
-//AudioConnection     patchCord5(sine, 0, i2s1, 1);
-//AudioControlSGTL5000     audioboard;
-
-//AudioSynthWaveform       waveform1;      //xy=171,84
-//AudioSynthWaveform       waveform2;      //xy=178,148
-//AudioOutputI2S           i2s1;           //xy=360,98
-//AudioConnection          patchCord1(waveform1, 0, i2s1, 0);
-//AudioConnection          patchCord2(waveform2, 0, i2s1, 1);
-//AudioControlSGTL5000     audioboard;     //xy=239,232
+//OutputJack* outputJack2;
 AudioSynthWaveformModulated* sine;
 
 
@@ -73,19 +39,7 @@ void setup()
   // Wait for serial monitor
   while (!Serial && millis() < 2500); 
 
-//  Test* test = new Test("test1");
-//  Test* test2 = new Test("test2");
-//  Test* test3 = new Test("test3");
-//
-//  for(int i=0; i<Test::getCount(); i++){
-//   Serial.println(Test::getEntities()[i]->getName());
-//  }
-//
-//  for(Test* t : Test::getEntities()){
-//   Serial.println(t->getName());
-//  }
-
-   // Audio connections require memory to work.  For more
+  // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
   AudioMemory(10);
 
@@ -113,9 +67,9 @@ void setup()
 //  led2->setMidiCC(0); // CC number, the channel is the board one
 
 
-  InputMidiNote* inputMidiNote1 = new InputMidiNote("inputMidiNote1", 1);
-  inputMidiNote1->setHandleMidiNoteOn(noteOnCallback);
-  inputMidiNote1->setHandleMidiNoteOff(noteOffCallback);
+//  InputMidiNote* inputMidiNote1 = new InputMidiNote("inputMidiNote1", 1);
+//  inputMidiNote1->setHandleMidiNoteOn(noteOnCallback);
+//  inputMidiNote1->setHandleMidiNoteOff(noteOffCallback);
   
   InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
 //pot1->setType("Gate");
@@ -126,15 +80,16 @@ void setup()
 //pot2->setType("Trigger");
 //  pot2->setOnChange(onChangePot2);
 
+InputJack* inputJack1 = new InputJack(7, "inputJack1");
+
 OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
-outputJack1->setSmoothing(1);
+//outputJack1->setSmoothing(1);
 
-outputJack2 = new OutputJack(1, "outputJack2");
+//outputJack2 = new OutputJack(1, "outputJack2");
 
-  AudioConnection* patchCord1 = new AudioConnection(*inputMidiNote1, 0, *outputJack1, 0);
-//  AudioConnection* patchCord2 = new AudioConnection(*pot2, 0, *outputJack2, 0);
   AudioConnection* patchCord3 = new AudioConnection(*pot1, 0, *led1, 0);
-  AudioConnection* patchCord4 = new AudioConnection(*outputJack2, 0, *led2, 0);
+  AudioConnection* patchCord5 = new AudioConnection(*pot1, 0, *outputJack1, 0);
+  AudioConnection* patchCord4 = new AudioConnection(*inputJack1, 0, *led2, 0);
 
 //  TODO: Virtual IOs
 //  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
@@ -185,11 +140,11 @@ void loop()
 //  Serial.println(customStream1.getValue());
   Motherboard.update();
 
-  if(timeOut%100 == 0){
-    outValue++;
-    outValue = outValue % 4095;
-    outputJack2->setTarget(outValue);
-  }
+//  if(timeOut%100 == 0){
+//    outValue++;
+//    outValue = outValue % 4095;
+//    outputJack2->setTarget(outValue);
+//  }
 //
 //  if(timeOut%150 == 0){
 //    outValue2++;
