@@ -23,5 +23,4 @@ inline void PhysicalOutput::update(){
   IO::update();
 }
 
-//#define PhysicalOutput MotherboardNamespace::PhysicalOutput
 #endif

@@ -25,8 +25,6 @@ using EdgeCallback = void (*)(String);
 using ChangeCallback = void (*)(String name, float value, float diff);
 using ChangeQuantizedCallback = void (*)(byte inputIndex, int value);
 
-
-//#include "IORegistrar.h"
 #include "InputPotentiometer.h"
 #include "InputJack.h"
 #include "InputMidiNote.h"
@@ -46,26 +44,7 @@ public:
     // Debug
     void print();
 
-//    float getInputValue(byte index);
-//    float getOutputValue(byte index);
-//    void setOutputValue(byte index, unsigned int value);
-//    void setLED(byte index, Led::Status status, unsigned int brightness);
-//    void setSmoothing(byte smoothing);
-//    unsigned int getAnalogMaxValue();
-//    unsigned int getAnalogMinValue();
     byte getDipswitchValue();
-
-    
-    // Callbacks
-//    void setHandleTriggerDown(byte inputIndex, TriggerDownCallback fptr);
-//    void setHandleLongTriggerDown(byte inputIndex, LongTriggerDownCallback fptr);
-//    void setHandleTriggerUp(byte inputIndex, TriggerUpCallback fptr);
-//    void setHandleLongTriggerUp(byte inputIndex, LongTriggerUpCallback fptr);
-//    void setHandleChange(byte inputIndex, ChangeCallback fptr);
-//    void setHandleChangeQuantized(byte inputIndex, ChangeQuantizedCallback fptr);
-
-    // Registrar
-    
 
 private:
     // Only Motherboard can access this instance
@@ -86,8 +65,6 @@ private:
     void iterateIO();
     void readWriteIO();
     
-//    static void handleMidiControlChange(byte channel, byte controlNumber, byte value);
-
     // Calibration
     byte calibrationSequenceSteps[4]= {15, 7, 15, 7};
     byte calibrationSequenceCurrentStep = 0;
@@ -108,7 +85,6 @@ private:
 
 // Instance pre init
 IOManager *IOManager::instance = nullptr;
-
 
 
 /**
@@ -148,15 +124,6 @@ inline void IOManager::init(byte columnNumber)
     SPI.setClockDivider(SPI_CLOCK_DIV2);
     SPI.begin();
 
-//    for(unsigned int i = 0; i<IORegistrar::inputsSize; i++){
-//      IORegistrar::getInputs()[i]->transitionTo(new IOStateDefault());
-//    }
-//    for(unsigned int i = 0; i<IORegistrar::outputsSize; i++){
-//      IORegistrar::getOutputs()[i]->transitionTo(new IOStateDefault());
-//    }
-//    for(unsigned int i = 0; i<IORegistrar::ledsSize; i++){
-//      IORegistrar::getLeds()[i]->transitionTo(new IOStateDefault());
-//    }
     for(PhysicalInput* i : PhysicalInput::getAll()){
       i->transitionTo(new IOStateDefault());
     }
@@ -175,9 +142,6 @@ inline void IOManager::update()
 {
     if (this->clockIteration >= this->intervalIteration)
     {
-//      for(unsigned int i = 0; i<IO::inputsSize; i++){
-//        Serial.println(IO::getInputs()[i]->getClassName());
-//      }
         // Iterate to the next input and output
         this->iterateIO();
 
@@ -208,21 +172,9 @@ inline void IOManager::update()
         this->calibrationSequenceClock = 0;
 
         if(this->calibrationSequenceCurrentStep == 4){
-          // We switch now to calibrate mode
-//          for(unsigned int i = 0; i<IORegistrar::inputsSize; i++){
-//            IORegistrar::getInputs()[i]->transitionTo(new IOStateCalibrate);
-//          }
-
           for(PhysicalInput* i : PhysicalInput::getAll()){
             i->transitionTo(new IOStateCalibrate());
           }
-
-//          for(unsigned int i = 0; i<IO::outputsSize; i++){
-//            IO::getOutputs()[i]->transitionTo(new IOStateCalibrate());
-//          }
-//          for(unsigned int i = 0; i<IO::ledsSize; i++){
-//            IO::getLeds()[i]->transitionTo(new IOStateCalibrate());
-//          }
         }
       }
       if(this->calibrationSequenceClock > this->calibrationSequenceClockMax){
@@ -230,12 +182,9 @@ inline void IOManager::update()
         this->calibrationSequenceCurrentStep = 0;
       }
     }else{
-//      for(unsigned int i = 0; i<IORegistrar::ledsSize; i++){
-//        IORegistrar::getLeds()[i]->set(Led::Status::Blink, 4095);
-//      }
-          for(Led* i : Led::getAll()){
-            i->set(Led::Status::Blink, ABSOLUTE_ANALOG_MAX);
-          }
+      for(Led* i : Led::getAll()){
+        i->set(Led::Status::Blink, ABSOLUTE_ANALOG_MAX);
+      }
 
       this->calibrate();
           
@@ -243,16 +192,10 @@ inline void IOManager::update()
         // Exit calibration
         this->calibrationSequenceClock = 0;
         this->calibrationSequenceCurrentStep = 0;
-//        for(unsigned int i = 0; i<IORegistrar::ledsSize; i++){
-//          IORegistrar::getLeds()[i]->set(Led::Status::Off, 0);
-//        }
           for(Led* i : Led::getAll()){
             i->set(Led::Status::Off, 0);
           }
-        
-//        for(unsigned int i = 0; i<IORegistrar::inputsSize; i++){
-//          IORegistrar::getInputs()[i]->transitionTo(new IOStateDefault);
-//        }
+          
           for(PhysicalInput* i : PhysicalInput::getAll()){
             i->transitionTo(new IOStateDefault());
           }
@@ -413,132 +356,10 @@ inline void IOManager::readWriteIO()
     }
 }
 
-
-//inline void IOManager::setSmoothing(byte smoothing){
-//  for(APhysicalInput* i : IO::getInputs()){
-//    i->setSmoothing(smoothing);
-//  }
-//  for(APhysicalOutput* o : IO::getOutputs()){
-//    o->setSmoothing(smoothing);
-//  }
-//}
-
-
-///**
-// * Handle press down on a button
-// */
-//inline void IOManager::setHandleTriggerDown(byte index, TriggerDownCallback fptr)
-//{
-//    this->inputs[index]->setTriggerDownCallback(fptr);
-//}
-//
-///**
-// * Handle press up on a button
-// */
-//inline void IOManager::setHandleTriggerUp(byte index, TriggerUpCallback fptr)
-//{
-//    this->inputs[index]->setTriggerUpCallback(fptr);
-//}
-//
-///**
-// * Handle long trigger down
-// */
-//inline void IOManager::setHandleLongTriggerDown(byte index, LongTriggerDownCallback fptr)
-//{
-//    this->inputs[index]->setLongTriggerDownCallback(fptr);
-//}
-//
-///**
-// * Handle long trigger up
-// */
-//inline void IOManager::setHandleLongTriggerUp(byte index, LongTriggerUpCallback fptr)
-//{
-//    this->inputs[index]->setLongTriggerUpCallback(fptr);
-//}
-//
-///**
-// * Handle change
-// */
-//inline void IOManager::setHandleChange(byte index, ChangeCallback fptr)
-//{
-//    this->inputs[index]->setChangeCallback(fptr);
-//}
-//
-///**
-// * Handle potentiometer
-// */
-//inline void IOManager::setHandleChangeQuantized(byte index, ChangeQuantizedCallback fptr)
-//{
-//    this->inputs[index]->setChangeQuantizedCallback(fptr);
-//}
-
-//inline void IOManager::setOutputValue(byte index, unsigned int value)
-//{
-//    IO::getOutputs()[index]->setTarget(value);
-//}
-
-//inline void IOManager::setLED(byte index, Led::Status status, unsigned int brightness = 4095)
-//{
-//    this->leds[index]->set(status, brightness);
-//}
-
-/**
- * Get input value
- * @param byte index The index of the input
- */
-//inline float IOManager::getInputValue(byte index)
-//{
-//  if(IO::getInputs().size() > 0 && index < IO::getInputs().size()){
-//    return IO::getInputs()[index]->getValue();
-//  }else{
-//    return 0;
-//  }
-//}
-
-/**
- * Get output value
- * @param byte index The index of the output
- */
-//inline float IOManager::getOutputValue(byte index)
-//{
-//  if(IO::getOutputs().size() > 0 && index < IO::getOutputs().size()){
-//    return IO::getOutputs()[index]->getValue();
-//  }else{
-//    return 0;
-//  }
-//}
-
 inline byte IOManager::getDipswitchValue()
 {
     return this->dipswitchValue;
 }
-
-/**
- * Get min analog value according to resolution
- */
-//inline unsigned int IOManager::getAnalogMinValue()
-//{
-//    return 0;
-//}
-//
-///**
-// * Get max analog value according to resolution
-// */
-//inline unsigned int IOManager::getAnalogMaxValue()
-//{
-//    return (1 << this->analogResolution) - 1;
-//}
-
-//inline void IOManager::handleMidiControlChange(byte channel, byte controlNumber, byte value){
-  //TODO: use the channel
-  
-//    for(APhysicalInput* i : IO::getInputs()){
-//        if(i->getMidiControlNumber() == controlNumber){
-//          int target = map(value, 0, 127, 0, 4095);
-//          i->setTarget(target);
-//        }
-//    }
-//}
 
 inline void IOManager::calibrate(){
   Serial.println("IOManager::calibrate()");
@@ -557,8 +378,6 @@ inline void IOManager::calibrate(){
   }
 
 }
-
-
 
 inline void IOManager::print(){
   Serial.print("Inputs: ");
@@ -584,7 +403,5 @@ inline void IOManager::print(){
   
   Serial.println("");
 }
-
-
 
 #endif

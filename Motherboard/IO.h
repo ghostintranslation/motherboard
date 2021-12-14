@@ -155,8 +155,6 @@ inline float IO::getValue()
 
 inline void IO::setValue(float value){
   this->value = this->ioType->processValue(value);
-  
-//  this->value = map(constrain(this->value, this->min, this->max), this->min, this->max, ABSOLUTE_ANALOG_MIN, ABSOLUTE_ANALOG_MAX);
 }
 
 inline float IO::getTarget()
@@ -184,10 +182,6 @@ inline void IO::updateTarget(){
       
       case Either:
       default:
-//      Serial.println(this->target);
-//      Serial.println(this->midiValue);
-//      Serial.println("");
-//        this->target = max(this->target, this->midiValue);
       break;
     }
   }else{
