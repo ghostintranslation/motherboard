@@ -24,13 +24,10 @@ https://github.com/ghostintranslation
 #include <Audio.h>
 #include "Motherboard.h"
 
-//#include "Test.h"
-
 AudioOutputI2S           i2s1; 
-//OutputJack* outputJack2;
-AudioSynthWaveformModulated* sine;
+//AudioSynthWaveformModulated* sine;
 
-
+IO* io;
 
 void setup()
 {
@@ -49,21 +46,15 @@ void setup()
 //  audioboard.enable();
 //  audioboard.volume(0.05); // caution: very loud - use oscilloscope only!
   
-//  TouchPad* pad1 = new TouchPad();
-//  TouchPad* pad2 = new TouchPad();
-//  TouchPad* pad3 = new TouchPad();
-
-//Button* but1 = new Button();
-
   
-  sine = new AudioSynthWaveformModulated();
-  sine->begin(WAVEFORM_SINE);
-  sine->frequency(0.5);
-  sine->amplitude(0.1);
+//  sine = new AudioSynthWaveformModulated();
+//  sine->begin(WAVEFORM_SINE);
+//  sine->frequency(0.5);
+//  sine->amplitude(0.1);
   
   Led* led1 = new Led(0);
 //  led1->setMidiCC(0); // CC number, the channel is the board one
-  Led* led2 = new Led(1);
+//  Led* led2 = new Led(1);
 //  led2->setMidiCC(0); // CC number, the channel is the board one
 
 
@@ -71,32 +62,18 @@ void setup()
 //  inputMidiNote1->setHandleMidiNoteOn(noteOnCallback);
 //  inputMidiNote1->setHandleMidiNoteOff(noteOffCallback);
   
-  InputPotentiometer* pot1 = new InputPotentiometer(0, "pot1");
-//pot1->setType("Gate");
-//  pot1->setMidiCC(1); // CC number, the channel is the board one
-//  pot1->setMidiMode(MidiMode::Multiply);
 
-//  InputPotentiometer* pot2 = new InputPotentiometer(1, "pot2");
-//pot2->setType("Trigger");
-//  pot2->setOnChange(onChangePot2);
 
-InputJack* inputJack1 = new InputJack(7, "inputJack1");
-
-OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
-//outputJack1->setSmoothing(1);
-
-//outputJack2 = new OutputJack(1, "outputJack2");
-
-  AudioConnection* patchCord3 = new AudioConnection(*pot1, 0, *led1, 0);
-  AudioConnection* patchCord5 = new AudioConnection(*pot1, 0, *outputJack1, 0);
-  AudioConnection* patchCord4 = new AudioConnection(*inputJack1, 0, *led2, 0);
+  InputPotentiometer* inputPot1= new InputPotentiometer(0, "inputPot1");
+  
+  InputJack* inputJack1 = new InputJack(6, "inputJack1");
+  inputJack1->setType("Quantized");
+  
+//  AudioConnection* patchCord3 = new AudioConnection(*inputJack1, 0, *led1, 0);
+//  AudioConnection* patchCord5 = new AudioConnection(*pot1, 0, *outputJack1, 0);
+//  AudioConnection* patchCord4 = new AudioConnection(*inputJack1, 0, *led2, 0);
 
 //  TODO: Virtual IOs
-//  InputMidiNote* inputMidiNote = new InputMidiNote(0); // 0 = channel
-//  inputMidiNote->onNoteOn(callback);
-//  inputMidiNote->onNoteOff(callback);
-//  inputMidiNote->setOnChange(callback);
-
 //  InputMidiCC* inputMidiCC = new InputMidiCC(0); // 0 = channel, the channel is the board one
 //  inputMidiCC->setOnChange(callback);
 
@@ -118,13 +95,13 @@ OutputJack* outputJack1 = new OutputJack(0, "outputJack1");
 //  Motherboard.setHandleMidiNoteOn(noteOnCallback);
 }
 
-elapsedMillis timeOut;
-int outValue = 0;
-int outValue2 = 0;
-
-
-const unsigned int intervalRefresh = 4;
-elapsedMicros clockRefresh;
+//elapsedMillis timeOut;
+//int outValue = 0;
+//int outValue2 = 0;
+//
+//
+//const unsigned int intervalRefresh = 4;
+//elapsedMicros clockRefresh;
 
 void loop()
 {
@@ -187,7 +164,7 @@ void onChangePot1(byte inputIndex, float value, float diffToPrevious){
 void onChangePot2(String name, float value, float diffToPrevious){
 //  waveform1.amplitude(map(value,0,4095,0,0.05));
 //amp.gain(map(value,0,4095,0,2));
-  sine->frequency(map(value,0,4095,0,20));
+//  sine->frequency(map(value,0,4095,0,20));
 //Serial.println("onChangePot2");
 }
 
