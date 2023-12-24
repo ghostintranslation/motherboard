@@ -21,21 +21,24 @@ https://www.ghostintranslation.com/
 
 #include <Audio.h>
 #include "Motherboard/Input.h"
-#include "Motherboard/Led.h"
+#include "Motherboard/OutputLed.h"
+#include "MyQuantizer.h"
 
 AudioOutputI2S i2s;
+AudioSynthWaveformSineModulated sine;
+MyQuantizer* quantizer;
 Input* input1;
 Input* input2;
 Input* input3;
 Input* input4;
 Input* input5;
 Input* input6;
-Led* led1;
-Led* led2;
-Led* led3;
-Led* led4;
-Led* led5;
-Led* led6;
+OutputLed* led1;
+OutputLed* led2;
+OutputLed* led3;
+OutputLed* led4;
+OutputLed* led5;
+OutputLed* led6;
 
 void setup() {
   Serial.begin(115200);
@@ -46,6 +49,11 @@ void setup() {
   // Audio connections require memory to work.
   AudioMemory(40);
 
+  sine.frequency(100);
+  sine.amplitude(1);
+
+  quantizer = new MyQuantizer();
+
   input1 = new Input(0);
   input2 = new Input(1);
   input3 = new Input(2);
@@ -53,24 +61,28 @@ void setup() {
   input5 = new Input(4);
   input6 = new Input(5);
 
-  led1 = new Led(0);
-  led1->setStatus(Led::Status::On);
-  led2 = new Led(1);
-  led2->setStatus(Led::Status::On);
-  led3 = new Led(2);
-  led3->setStatus(Led::Status::On);
-  led4 = new Led(3);
-  led4->setStatus(Led::Status::On);
-  led5 = new Led(4);
-  led5->setStatus(Led::Status::On);
-  led6 = new Led(5);
-  led6->setStatus(Led::Status::On);
+  led1 = new OutputLed(0);
+  led1->setLowPassCoeff(1);
+  led1->setStatus(OutputLed::Status::On);
+  led2 = new OutputLed(1);
+  led2->setStatus(OutputLed::Status::On);
+  led3 = new OutputLed(2);
+  led3->setStatus(OutputLed::Status::On);
+  led4 = new OutputLed(3);
+  led4->setStatus(OutputLed::Status::On);
+  led5 = new OutputLed(4);
+  led5->setStatus(OutputLed::Status::On);
+  led6 = new OutputLed(5);
+  led6->setStatus(OutputLed::Status::On);
 
-  new AudioConnection(*input1, 0, *led1, 0);
+  new AudioConnection(*input5, 0, sine, 0);
+  // new AudioConnection(sine, 0, *quantizer, 0);
+  // new AudioConnection(*quantizer, 0, *led1, 0);
+  new AudioConnection(sine, 0, *led1, 0);
   new AudioConnection(*input2, 0, *led2, 0);
   new AudioConnection(*input3, 0, *led3, 0);
   new AudioConnection(*input4, 0, *led4, 0);
-  new AudioConnection(*input5, 0, *led5, 0);
+  // new AudioConnection(*input5, 0, *led5, 0);
   new AudioConnection(*input6, 0, *led6, 0);
 }
 

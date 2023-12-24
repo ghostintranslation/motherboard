@@ -37,17 +37,23 @@ private:
     static uint16_t timerCallbackCount;
     static void timerCallback();
 
+    static uint8_t currentSampleIndex;
+
     Status status = Off;
 
     // Time counter for the blinking
     elapsedMillis blinkClock;
 
     static uint8_t ledsData;
+    static const uint16_t resolution = 255; // 65536;
+    static uint16_t ledsData2[AUDIO_BLOCK_SAMPLES][resolution];
     static void writeLeds();
 };
 
 uint8_t Led::ledsData = 0;
 uint16_t Led::timerCallbackCount = 0;
+uint8_t Led::currentSampleIndex = 0;
+uint16_t Led::ledsData2[AUDIO_BLOCK_SAMPLES][resolution];
 
 inline Led::Led(int8_t index) : AudioStream(1, inputQueueArray)
 {
@@ -65,7 +71,7 @@ inline Led::Led(int8_t index) : AudioStream(1, inputQueueArray)
     SPI.begin();
 
     PIT_MCR = 0;                 // Enable PIT
-    PIT_LDVAL0 = 2000;           // 135 = 352800Hz
+    PIT_LDVAL0 = 135;            // 545;            // 135 = 352800Hz  135 = 1/352800
     PIT_TCTRL0 = PIT_TCTRL_TIE;  // PIT Interrupt enable for Timer0
     PIT_TCTRL0 |= PIT_TCTRL_TEN; // start Timer0
     attachInterruptVector(IRQ_PIT, timerCallback);
@@ -84,7 +90,21 @@ inline void Led::update(void)
         {
             int16_t newVal = block->data[i] * this->multiplier;
             this->value = (this->lowPassCoeff * newVal) + (1.0f - this->lowPassCoeff) * this->value;
+
+            uint16_t offsetValue = (this->value + INT16_MAX) / 65535.0 * resolution + 0.5;
+            for (int t = 0; t < resolution; ++t)
+            {
+                ledsData2[i][t] ^= (-(offsetValue > t) ^ ledsData2[i][t]) & (1 << (this->index));
+            }
         }
+
+        // currentSampleIndex = 0;
+        // uint16_t offsetValue = 127; //(this->value + INT16_MAX) / 65535.0 * resolution + 0.5;
+        // for (int t = 0; t < resolution; ++t)
+        // {
+        //     // set (pin % 8)th bit to (value > t)
+        //     ledsData2[t] ^= (-(offsetValue > t) ^ ledsData2[t]) & (1 << (this->index));
+        // }
 
         release(block);
     }
@@ -131,11 +151,24 @@ inline void Led::update(void)
         break;
     }
 }
-
+// elapsedMicros counter;
 inline void Led::timerCallback()
 {
     timerCallbackCount++;
-    timerCallbackCount = timerCallbackCount % 255;
+    timerCallbackCount = timerCallbackCount % resolution;
+
+    if (timerCallbackCount == 0)
+    {
+        currentSampleIndex++;
+        Serial.println(currentSampleIndex);
+
+        if (currentSampleIndex >= AUDIO_BLOCK_SAMPLES)
+        {
+            currentSampleIndex = 0;
+        }
+        //     Serial.println(counter);
+        //     counter = 0;
+    }
 
     writeLeds();
 
@@ -175,47 +208,63 @@ inline void Led::setLowPassCoeff(float coeff)
     this->lowPassCoeff = coeff;
 }
 
+uint8_t bip = B11111111;
+
 inline void Led::writeLeds()
 {
     // Preparing the shift register data
-    uint8_t newLedsData = 0;
+    // uint8_t newLedsData = 0;
 
-    // Preparing the LEDs data
-    for (uint8_t i = 0; i < Led::getCount(); i++)
-    {
-        if (Led::get(i)->getValue() == INT16_MIN)
-        {
-            continue;
-        }
-        else if (Led::get(i)->getValue() == INT16_MAX)
-        {
-            bitSet(newLedsData, Led::get(i)->getIndex());
-        }
-        // The value is a int16_t, offseting it to uint16_t in order to run this comparison
-        else if (timerCallbackCount < (Led::get(i)->getValue() + INT16_MAX) >> 8)
-        {
-            bitSet(newLedsData, Led::get(i)->getIndex());
-        }
-    }
+    // // Preparing the LEDs data
+    // for (uint8_t i = 0; i < Led::getCount(); i++)
+    // {
+    //     if (Led::get(i)->getValue() == INT16_MIN)
+    //     {
+    //         continue;
+    //     }
+    //     else if (Led::get(i)->getValue() == INT16_MAX)
+    //     {
+    //         bitSet(newLedsData, Led::get(i)->getIndex());
+    //     }
+    //     // The value is a int16_t, offseting it to uint16_t in order to run this comparison
+    //     else if (timerCallbackCount < (Led::get(i)->getValue() + INT16_MAX) >> 8)
+    //     {
+    //         bitSet(newLedsData, Led::get(i)->getIndex());
+    //     }
+    // }
 
-    // Reduce SPI use by not pushing data if not necessary
-    if (ledsData == newLedsData)
-    {
-        return;
-    }
+    // // Reduce SPI use by not pushing data if not necessary
+    // if (ledsData == newLedsData)
+    // {
+    //     return;
+    // }
+
+    // // Set the latch to low (activate the shift registers)
+    // digitalWrite(REGISTERS_LATCH_PIN, LOW);
+
+    // // Send the leds byte
+    // SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
+    // SPI.transfer(newLedsData);
+    // SPI.endTransaction();
+
+    // // Set the latch to high (shift registers actually set their pins and stop listening)
+    // digitalWrite(REGISTERS_LATCH_PIN, HIGH);
+
+    // ledsData = newLedsData;
 
     // Set the latch to low (activate the shift registers)
-    digitalWrite(REGISTERS_LATCH_PIN, LOW);
+    digitalWriteFast(REGISTERS_LATCH_PIN, LOW);
 
     // Send the leds byte
-    SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-    SPI.transfer(newLedsData);
+    SPI.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE0));
+    SPI.transfer(ledsData2[currentSampleIndex][timerCallbackCount]);
+    // SPI.transfer(bip);
     SPI.endTransaction();
 
-    // Set the latch to high (shift registers actually set their pins and stop listening)
-    digitalWrite(REGISTERS_LATCH_PIN, HIGH);
+    bip ^= B11111111;
 
-    ledsData = newLedsData;
+    // Set the latch to high (shift registers actually set their pins and stop listening)
+    digitalWriteFast(REGISTERS_LATCH_PIN, HIGH);
 }
 
 #endif
