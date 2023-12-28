@@ -9,7 +9,7 @@ class OutputTrigger : public Output, public Registrar<OutputTrigger>
 public:
     OutputTrigger(int8_t index);
     void update(void);
-    int16_t *&updateBefore(int16_t *&block);
+    int16_t *&updateBefore(int16_t *&blockData);
     void trigger();
     void setThreshold(int16_t threshold);
 
@@ -17,7 +17,7 @@ private:
     audio_block_t *inputQueueArray[1];
     uint8_t index;
     int16_t threshold = 0;
-    uint16_t triggerDuration = 256; // 128 samples at 44100Hz means 2.9ms
+    uint16_t triggerDuration = 256; // 256 samples at 44100Hz means 5.8ms
     uint16_t triggerSamplesleft = 0;
     int16_t previousSample = 0;
 };

@@ -9,7 +9,7 @@ class OutputGate : public Output, public Registrar<OutputGate>
 public:
     OutputGate(int8_t index);
     void update(void);
-    int16_t *&updateBefore(int16_t *&block);
+    int16_t *&updateBefore(int16_t *&blockData);
     // void open();
     // void close();
     void setThresholds(int16_t openThreshold, int16_t closeThreshold);
