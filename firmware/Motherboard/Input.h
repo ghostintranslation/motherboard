@@ -19,6 +19,7 @@ class Input : public AudioStream
 public:
     Input(byte index);
     void update(void);
+    virtual int16_t *&updateBefore(int16_t *&blockData) { return blockData; };
     void setLowPassCoeff(float coeff);
 
 private:
@@ -207,6 +208,9 @@ inline void Input::update(void)
 
     if (inputBuffer != NULL)
     {
+        // Allows for derived class to alter the data before being transmitted
+        inputBuffer = this->updateBefore(inputBuffer);
+
         // Raw output
         if (block)
         {

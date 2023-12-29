@@ -21,6 +21,8 @@ https://www.ghostintranslation.com/
 
 #include <Audio.h>
 #include "Motherboard/Input.h"
+#include "Motherboard/InputGate.h"
+#include "Motherboard/InputTrigger.h"
 #include "Motherboard/OutputLed.h"
 #include "Motherboard/OutputTrigger.h"
 #include "Motherboard/OutputGate.h"
