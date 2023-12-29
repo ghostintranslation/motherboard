@@ -29,7 +29,7 @@ protected:
     static uint16_t queue[8][buffSize * 2];
     static uint16_t head[8];
     float smoothing = 0;
-    int16_t smoothingPrevValue = 0;
+    double smoothingPrevValue = 0;
 };
 
 // PeriodicTimer* Output::t1;
@@ -71,43 +71,42 @@ inline void Output::update(void)
     audio_block_t *block;
     block = receiveReadOnly(0);
 
+    int16_t *blockDataPointer;
+    int16_t blockData[AUDIO_BLOCK_SAMPLES]{0};
+    blockDataPointer = blockData;
+
     if (block)
     {
-
-        int16_t *blockDataPointer;
-        int16_t blockData[AUDIO_BLOCK_SAMPLES]{0};
-        blockDataPointer = blockData;
-
         for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
         {
             blockDataPointer[i] = block->data[i];
         }
 
-        // Allows for derived class to alter the block before being processed here
-        blockDataPointer = this->updateBefore(blockDataPointer);
+        release(block);
+    }
 
-        uint8_t sampleIndex = head[this->index];
+    // Allows for derived class to alter the block before being processed here
+    blockDataPointer = this->updateBefore(blockDataPointer);
 
-        for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+    uint8_t sampleIndex = head[this->index];
+
+    for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+    {
+
+        this->smoothingPrevValue = (double)blockDataPointer[i] * (1.0f - this->smoothing) + this->smoothingPrevValue * this->smoothing;
+        blockDataPointer[i] = this->smoothingPrevValue;
+
+        if (audioSampleRateToPwmSampleRateRatio <= 1 || i % audioSampleRateToPwmSampleRateRatio == 0)
         {
 
-            blockDataPointer[i] = blockDataPointer[i] * (1.0f - this->smoothing) + this->smoothingPrevValue * this->smoothing;
-            this->smoothingPrevValue = blockDataPointer[i];
-
-            if (audioSampleRateToPwmSampleRateRatio <= 1 || i % audioSampleRateToPwmSampleRateRatio == 0)
+            if (++sampleIndex >= buffSize)
             {
-
-                if (++sampleIndex >= buffSize)
-                {
-                    sampleIndex = 0;
-                }
-
-                uint16_t offsetValue = (blockDataPointer[i] + INT16_MAX) / 65535.0 * resolution + 0.5;
-                queue[this->index][sampleIndex] = offsetValue;
+                sampleIndex = 0;
             }
-        }
 
-        release(block);
+            uint16_t offsetValue = (blockDataPointer[i] + INT16_MAX) / 65535.0 * resolution + 0.5;
+            queue[this->index][sampleIndex] = offsetValue;
+        }
     }
 }
 
@@ -155,8 +154,30 @@ inline void Output::timerCallback()
     PIT_TFLG0 |= PIT_TFLG_TIF; // to enable interrupt again
 }
 
+/**
+ * @brief Set the smoothing coefficient
+ *
+ * @param smoothing Between 0 and 1;
+ */
 inline void Output::setSmoothing(float smoothing)
 {
+    if (smoothing < 0)
+    {
+        smoothing = 0;
+    }
+    else if (smoothing >= 1)
+    {
+        smoothing = 0.999999;
+    }
+
+    // if (smoothing == 0)
+    // {
+    //     this->smoothing = 0;
+    // }
+    // else
+    // {
+    //     this->smoothing = log10(9.99 + smoothing * 0.01);
+    // }
     this->smoothing = smoothing;
 }
 

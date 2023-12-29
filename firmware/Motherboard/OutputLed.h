@@ -27,9 +27,9 @@ private:
     uint8_t index;
     uint8_t multiplier = 0;
     Status status = Default;
-    uint16_t blinkingDuration = 400 / 1000 / (1 / AUDIO_SAMPLE_RATE);     // 17640 samples at 44100Hz means 400ms
-    uint16_t fastBlinkingDuration = 200 / 1000 / (1 / AUDIO_SAMPLE_RATE); // 8820 samples at 44100Hz means 200ms
-    uint16_t blinkOnceDuration = 10 / 1000 / (1 / AUDIO_SAMPLE_RATE);     // 441 samples at 44100Hz means 10ms
+    uint16_t blinkingDuration = 400.0 / 1000 / (1.0 / AUDIO_SAMPLE_RATE);     // 17640 samples at 44100Hz means 400ms
+    uint16_t fastBlinkingDuration = 200.0 / 1000 / (1.0 / AUDIO_SAMPLE_RATE); // 8820 samples at 44100Hz means 200ms
+    uint16_t blinkOnceDuration = 10.0 / 1000 / (1.0 / AUDIO_SAMPLE_RATE);     // 441 samples at 44100Hz means 10ms
     uint16_t statusSamplesleft = 0;
 };
 
@@ -39,71 +39,69 @@ inline OutputLed::OutputLed(int8_t index) : Output(index)
 
 inline int16_t *&OutputLed::updateBefore(int16_t *&blockData)
 {
-    if (blockData)
+
+    for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
     {
-        for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+        switch (this->status)
         {
-            switch (this->status)
+        case Blink:
+            if (this->statusSamplesleft > this->blinkingDuration / 2)
             {
-            case Blink:
-                if (this->statusSamplesleft > this->blinkingDuration / 2)
-                {
-                    blockData[i] = INT16_MIN;
-                }
-                else if (this->statusSamplesleft == 0)
-                {
-                    this->statusSamplesleft = this->blinkingDuration;
-                }
-                else
-                {
-                    blockData[i] = INT16_MAX;
-                }
-                break;
-
-            case BlinkFast:
-                if (this->statusSamplesleft > this->fastBlinkingDuration / 2)
-                {
-                    blockData[i] = INT16_MIN;
-                }
-                else if (this->statusSamplesleft == 0)
-                {
-                    this->statusSamplesleft = this->fastBlinkingDuration;
-                }
-                else
-                {
-                    blockData[i] = INT16_MAX;
-                }
-                break;
-
-            case BlinkOnce:
-                if (this->statusSamplesleft > 0)
-                {
-                    blockData[i] = INT16_MAX;
-                }
-                else
-                {
-                    blockData[i] = INT16_MIN;
-                }
-                break;
-
-            case Off:
                 blockData[i] = INT16_MIN;
-                break;
-
-            case On:
-                blockData[i] = INT16_MAX;
-                break;
-
-            default:
-            case Default:
-                break;
             }
-        }
-    }
+            else if (this->statusSamplesleft == 0)
+            {
+                this->statusSamplesleft = this->blinkingDuration;
+            }
+            else
+            {
+                blockData[i] = INT16_MAX;
+            }
+            break;
 
-    if (this->statusSamplesleft > 0)
-    {
-        this->statusSamplesleft--;
+        case BlinkFast:
+            if (this->statusSamplesleft > this->fastBlinkingDuration / 2)
+            {
+                blockData[i] = INT16_MIN;
+            }
+            else if (this->statusSamplesleft == 0)
+            {
+                this->statusSamplesleft = this->fastBlinkingDuration;
+            }
+            else
+            {
+                blockData[i] = INT16_MAX;
+            }
+            break;
+
+        case BlinkOnce:
+            if (this->statusSamplesleft > 0)
+            {
+                blockData[i] = INT16_MAX;
+            }
+            else
+            {
+                blockData[i] = INT16_MIN;
+            }
+            break;
+
+        case Off:
+            blockData[i] = INT16_MIN;
+            break;
+
+        case On:
+            blockData[i] = INT16_MAX;
+            break;
+
+        default:
+        case Default:
+            break;
+        }
+
+        if (this->statusSamplesleft > 0)
+        {
+            this->statusSamplesleft--;
+        }
     }
 
     return blockData;

@@ -35,15 +35,11 @@ Input* input3;
 Input* input4;
 Input* input5;
 Input* input6;
-OutputLed led(0);
-OutputTrigger outputTrigger(1);
-OutputGate outputGate(2);
-
-// OutputLed* led2;
-// OutputLed* led3;
-// OutputLed* led4;
-// OutputLed* led5;
-// OutputLed* led6;
+OutputLed led1(0);
+OutputLed led2(1);
+OutputLed led3(2);
+OutputLed led4(3);
+OutputLed led5(4);
 
 void setup() {
   Serial.begin(115200);
@@ -66,28 +62,18 @@ void setup() {
   input5 = new Input(4);
   input6 = new Input(5);
 
-  // led1 = new OutputLed(0);
-  // led1->setLowPassCoeff(1);
-  // led1->setStatus(OutputLed::Status::On);
-  // led2 = new OutputLed(1);
-  // led2->setStatus(OutputLed::Status::On);
-  // led3 = new OutputLed(2);
-  // led3->setStatus(OutputLed::Status::On);
-  // led4 = new OutputLed(3);
-  // led4->setStatus(OutputLed::Status::On);
-  // led5 = new OutputLed(4);
-  // led5->setStatus(OutputLed::Status::On);
-  // led6 = new OutputLed(5);
-  // led6->setStatus(OutputLed::Status::On);
 
-  led.setStatus(OutputLed::Status::On);
+  led2.setStatus(OutputLed::Status::Blink);
+  led3.setStatus(OutputLed::Status::BlinkFast);
+  led4.setStatus(OutputLed::Status::Blink);
+  led4.setSmoothing(0.9999);
+  led5.setStatus(OutputLed::Status::BlinkFast);
+  led5.setSmoothing(0.999);
 
   new AudioConnection(*input5, 0, sine, 0);
   // new AudioConnection(sine, 0, *quantizer, 0);
   // new AudioConnection(*quantizer, 0, *led1, 0);
-  new AudioConnection(sine, 0, led, 0);
-  new AudioConnection(sine, 0, outputTrigger, 0);
-  new AudioConnection(sine, 0, outputGate, 0);
+  new AudioConnection(sine, 0, led1, 0);
   // new AudioConnection(*input2, 0, *led2, 0);
   // new AudioConnection(*input3, 0, *led3, 0);
   // new AudioConnection(*input4, 0, *led4, 0);
