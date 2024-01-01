@@ -5,8 +5,6 @@
 #include <SPI.h>
 
 #define REGISTERS_LATCH_PIN 9
-#define SPI_CLOCK_PIN 8
-#define SPI_MOSI_PIN 11
 
 class Output : public AudioStream
 {
@@ -20,23 +18,21 @@ public:
 protected:
     audio_block_t *inputQueueArray[1];
     uint8_t index;
-    static uint16_t error[8];
-    static uint8_t previousBits;
+    static const uint8_t maxOutputs = 16;
+    static uint16_t error[maxOutputs];
     static const uint16_t resolution = 256;
     static const uint32_t pwmSampleRate = (786000 / resolution);
     static const uint16_t buffSize = (1.0 / AUDIO_SAMPLE_RATE * AUDIO_BLOCK_SAMPLES) / (1.0 / pwmSampleRate) + 0.5;
     static const uint16_t audioSampleRateToPwmSampleRateRatio = ((uint16_t)AUDIO_SAMPLE_RATE / pwmSampleRate);
-    static uint16_t queue[8][buffSize * 2];
-    static uint16_t head[8];
+    static uint16_t queue[maxOutputs][buffSize * 2];
+    static uint16_t head[maxOutputs];
     float smoothing = 0;
     double smoothingPrevValue = 0;
 };
 
-// PeriodicTimer* Output::t1;
-uint8_t Output::previousBits = 0;
-uint16_t Output::error[8] = {0};
-uint16_t Output::head[8] = {0};
-uint16_t Output::queue[8][buffSize * 2] = {{0}};
+uint16_t Output::error[maxOutputs] = {0};
+uint16_t Output::head[maxOutputs] = {0};
+uint16_t Output::queue[maxOutputs][buffSize * 2] = {{0}};
 
 inline Output::Output(int8_t index)
     : AudioStream(1, inputQueueArray)
@@ -46,14 +42,9 @@ inline Output::Output(int8_t index)
 
     // SPI
     pinMode(REGISTERS_LATCH_PIN, OUTPUT);
-    // pinMode(SPI_CLOCK_PIN, OUTPUT);
-    // pinMode(SPI_MOSI_PIN, OUTPUT);
     SPI.setBitOrder(MSBFIRST);
     SPI.setDataMode(SPI_MODE0);
     SPI.setClockDivider(SPI_CLOCK_DIV2);
-    // SPI.setSCK(SPI_CLOCK_PIN);
-    // SPI.setMOSI(SPI_MOSI_PIN);
-    // SPI.setMISO(8);
     SPI.begin();
 
     // Timer
@@ -72,7 +63,7 @@ inline void Output::update(void)
     block = receiveReadOnly(0);
 
     int16_t *blockDataPointer;
-    int16_t blockData[AUDIO_BLOCK_SAMPLES]{0};
+    int16_t blockData[AUDIO_BLOCK_SAMPLES]{INT16_MIN};
     blockDataPointer = blockData;
 
     if (block)
@@ -113,8 +104,8 @@ inline void Output::update(void)
 inline void Output::timerCallback()
 {
 
-    uint8_t bits = 0;
-    for (uint8_t i = 0; i < 8; i++)
+    uint32_t bits = 0;
+    for (uint8_t i = 0; i < maxOutputs; i++)
     {
         if (head[i] >= buffSize)
         {
@@ -129,27 +120,22 @@ inline void Output::timerCallback()
             error[i] -= resolution;
         }
     }
-    // Serial.println(bits);
 
-    // if (previousBits != bits)
-    // {
-    // digitalWriteFast(13, bits & 1);
-
-    SPI.beginTransaction(SPISettings(40000000, MSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(60000000, MSBFIRST, SPI_MODE0));
 
     // Set the latch to low (activate the shift registers)
     digitalWriteFast(REGISTERS_LATCH_PIN, LOW);
 
-    // // Send the data
-    SPI.transfer(bits);
+    // for (int i = 1; i >= 0; i--)
+    // {
+    //     SPI.transfer16(bits >> (i * 16) & 0xFFFF);
+    // }
+    SPI.transfer16(bits & 0xFFFF);
 
     // Set the latch to high (shift registers actually set their pins and stop listening)
     digitalWriteFast(REGISTERS_LATCH_PIN, HIGH);
 
     SPI.endTransaction();
-
-    previousBits = bits;
-    // }
 
     PIT_TFLG0 |= PIT_TFLG_TIF; // to enable interrupt again
 }
