@@ -70,7 +70,7 @@ uint16_t Input::headQueueTempCount[inputsMax] = {0};
 int16_t Input::headQueueTemp[inputsMax][AUDIO_BLOCK_SAMPLES] = {{0}};
 uint16_t Input::tail[inputsMax] = {0};
 float Input::accumulator[inputsMax] = {0};
-float Input::lowPassCoeff[inputsMax] = {0.1f};
+float Input::lowPassCoeff[inputsMax] = {1.0f};
 ADC *Input::adc = nullptr;
 DMAChannel Input::dmaChannel1;
 DMAChannel Input::dmaChannel2;
@@ -161,12 +161,13 @@ inline Input::Input(byte index)
         adc->adc1->startTimer(AUDIO_SAMPLE_RATE * 8);
     }
 
-    lowPassCoeff[index] = 0.05;
+    lowPassCoeff[index] = 1.0;
     accumulator[index] = 0;
 }
 
 inline void Input::update(void)
 {
+    // TODO: Interpolate instead of filling the remainings
     // If the sampling was too slow then samples are missing, filling the remaining with the last value
     if (headQueueTempCount[this->index] < buffSize)
     {
@@ -347,7 +348,13 @@ inline void Input::addSample(uint16_t val, uint8_t inputIndex)
         return;
     }
 
-    int16_t newVal = val * 16 - 32768;
+    int32_t newVal = val * 16 - 32768;
+    newVal = constrain(newVal, -32300, 32750);
+    newVal = (float)(newVal + 32300) / (32300 + 32750) * UINT16_MAX - INT16_MIN;
+    if (newVal < INT16_MIN)
+    {
+        newVal = INT16_MIN;
+    }
 
     for (uint8_t i = 0; i < downSamplingFactor; i++)
     {

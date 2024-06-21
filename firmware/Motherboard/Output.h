@@ -5,7 +5,8 @@
 #include <SPI.h>
 
 #define REGISTERS_LATCH_PIN 9
-
+elapsedMicros counter;
+uint16_t cc = 0;
 class Output : public AudioStream
 {
 public:
@@ -21,6 +22,8 @@ protected:
     static const uint8_t maxOutputs = 16;
     static uint16_t error[maxOutputs];
     static const uint16_t resolution = 256;
+    static uint16_t ticks;
+    static uint16_t currentBit;
     static const uint32_t pwmSampleRate = (786000 / resolution);
     static const uint16_t buffSize = (1.0 / AUDIO_SAMPLE_RATE * AUDIO_BLOCK_SAMPLES) / (1.0 / pwmSampleRate) + 0.5;
     static const uint16_t audioSampleRateToPwmSampleRateRatio = ((uint16_t)AUDIO_SAMPLE_RATE / pwmSampleRate);
@@ -33,6 +36,8 @@ protected:
 uint16_t Output::error[maxOutputs] = {0};
 uint16_t Output::head[maxOutputs] = {0};
 uint16_t Output::queue[maxOutputs][buffSize * 2] = {{0}};
+uint16_t Output::ticks = 1;
+uint16_t Output::currentBit = 1;
 
 inline Output::Output(int8_t index)
     : AudioStream(1, inputQueueArray)
@@ -54,6 +59,7 @@ inline Output::Output(int8_t index)
     PIT_TCTRL0 |= PIT_TCTRL_TEN; // start Timer0
     attachInterruptVector(IRQ_PIT, timerCallback);
     NVIC_ENABLE_IRQ(IRQ_PIT);
+    // NVIC_SET_PRIORITY(IRQ_PIT, 200); // Needed so that this timer doesn't interferes with the audio
 }
 
 inline void Output::update(void)
@@ -72,7 +78,6 @@ inline void Output::update(void)
         {
             blockDataPointer[i] = block->data[i];
         }
-
         release(block);
     }
 
@@ -95,47 +100,64 @@ inline void Output::update(void)
                 sampleIndex = 0;
             }
 
-            uint16_t offsetValue = (blockDataPointer[i] + INT16_MAX) / 65535.0 * resolution + 0.5;
+            uint16_t offsetValue = (blockDataPointer[i] + INT16_MAX) / 65535.0 * resolution - 0.5;
             queue[this->index][sampleIndex] = offsetValue;
         }
     }
 }
 
+/**
+ * Implementation of the Binary Code Modulation method
+ * https://www.batsocks.co.uk/readme/art_bcm_3.htm
+ *
+ */
 inline void Output::timerCallback()
 {
-
-    uint32_t bits = 0;
-    for (uint8_t i = 0; i < maxOutputs; i++)
+    if (ticks == currentBit)
     {
-        if (head[i] >= buffSize)
+        uint32_t bits = 0;
+        for (uint8_t i = 0; i < maxOutputs; i++)
         {
-            head[i] = 0;
+            if (queue[i][head[i]] & currentBit)
+            {
+                bits = bits | 1 << i;
+            }
         }
 
-        error[i] += queue[i][head[i]++]; // integrate error (SIGMA)
+        SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
 
-        if (error[i] >= resolution) // if error >= max value (DELTA)
+        // Set the latch to low (activate the shift registers)
+        digitalWriteFast(REGISTERS_LATCH_PIN, LOW);
+
+        SPI.transfer16(bits & 0xFFFF);
+
+        // Set the latch to high (shift registers actually set their pins and stop listening)
+        digitalWriteFast(REGISTERS_LATCH_PIN, HIGH);
+
+        SPI.endTransaction();
+
+        currentBit <<= 1;
+
+        if (currentBit > resolution / 2)
         {
-            bits = bits | 1 << i;
-            error[i] -= resolution;
+            currentBit = 1;
         }
     }
 
-    SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
+    ticks++;
+    if (ticks > resolution)
+    {
+        ticks = 1;
 
-    // Set the latch to low (activate the shift registers)
-    digitalWriteFast(REGISTERS_LATCH_PIN, LOW);
-
-    // for (int i = 1; i >= 0; i--)
-    // {
-    //     SPI.transfer16(bits >> (i * 16) & 0xFFFF);
-    // }
-    SPI.transfer16(bits & 0xFFFF);
-
-    // Set the latch to high (shift registers actually set their pins and stop listening)
-    digitalWriteFast(REGISTERS_LATCH_PIN, HIGH);
-
-    SPI.endTransaction();
+        for (uint8_t i = 0; i < maxOutputs; i++)
+        {
+            head[i]++;
+            if (head[i] >= buffSize)
+            {
+                head[i] = 0;
+            }
+        }
+    }
 
     PIT_TFLG0 |= PIT_TFLG_TIF; // to enable interrupt again
 }
@@ -156,14 +178,6 @@ inline void Output::setSmoothing(float smoothing)
         smoothing = 0.999999;
     }
 
-    // if (smoothing == 0)
-    // {
-    //     this->smoothing = 0;
-    // }
-    // else
-    // {
-    //     this->smoothing = log10(9.99 + smoothing * 0.01);
-    // }
     this->smoothing = smoothing;
 }
 

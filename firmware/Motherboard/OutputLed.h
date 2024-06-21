@@ -35,6 +35,7 @@ private:
 
 inline OutputLed::OutputLed(int8_t index) : Output(index)
 {
+    this->smoothing = 0.9995;
 }
 
 inline int16_t *&OutputLed::updateBefore(int16_t *&blockData)
