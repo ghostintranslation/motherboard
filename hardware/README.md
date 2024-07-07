@@ -2,9 +2,7 @@
 
 The PCB is made so that it is possible to use either through hole or SMD for most components.
 
-<img src="./motherboard-closeup-1.JPG" width="200px"/>
-<img src="./motherboard-closeup-2.JPG" width="200px"/>
-<img src="./motherboard-closeup-3.JPG" width="200px"/>
+<img src="./motherboard-closeup-1.JPG" width="200px"/> <img src="./motherboard-closeup-2.JPG" width="200px"/> <img src="./motherboard-closeup-3.JPG" width="200px"/>
 
 ## Bill Of Materials
 
@@ -76,6 +74,8 @@ The op-amps, multiplexers, and shift registers are displayed twice in the schema
 The Motherboard itself does not include any audio DAC, this is because of limited space and to reduce cost for modules that would not require audio. However an expander connector is there to provide the necessary for adding such feature.
 
 I designed an audio-midi expander board that direcly attached on the back of the Motherboard. It provides 2 audio jacks and 2 MIDI jacks in the back to allow reducing clutter on the front, but the audio and MIDI signals are also available on the main headers to be passed to the front panels.
+
+<img src="./Audio-Midi expander-1.JPG" width="200px"/> <img src="./Audio-Midi expander-2.JPG" width="200px"/> 
 
 Simulation of the audio amplification circuit available [here](https://www.falstad.com/circuit/circuitjs.html?ctz=CQAgjCAMB0l3BWECAc0BsBOFCAsBmSTXMAdiOUmRAOQFMBaMMAKACUQGAmXK3FTlxQD+UcCC5xw0LtNxiYCFgENO6eepCbNApFTDx4E6AnhhcmUri6Z0kUpmNIDhlgHc180Q01VI7rXkqbSCWAHNOMCFwTFkmaMkBPxYAJ08aAXiRJPB4VMCC8w0g8FN8rJi4qIEisRc8tIraits6w38PH3kUKi7wXFDOzWbq-tCAY0FeDMjo0T9YQ0xlldW1xyZoMmt8UnxCBxR9hAgYOFZGnj5Mq-Bo-VcI7mnR5-0BhXyuBHQC79+wHY2nBwhIfuAgf8JJAcv5JrVhrECgt2us0StjOguGB8AhUKQbMQEKQjlBFqwAB4STD4O6yfDEO5IeQ8EAAQQArgATACWAHsADoAZz5HIALuxZgJWkwka0-DQqHoFCYAn0GN5NExfh0Cgx8LItfM1VrAelkh5Tb9fFAAla9QbbR4wEjNFDfCwqfrCCBSIIerkaBJ5AARNkAYU9kWYkVxpV6ONkLPkAGUeQA7MIAGzowqFHIADgWswBPYXKbn88sAWwL+SNmQbYkkIL5YhtvGW1DOkDAP2+zbE+BYbfMyJouKQekWWOcEn6IGHQA).
 

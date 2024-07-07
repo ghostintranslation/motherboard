@@ -6,9 +6,7 @@ Motherboard is a Eurorack and general modular synthesizers platform built around
 
 The hardware consists of one PCB that allows to build modules as small as 8HP while the firmware consists of a collection of classes compatible with Teensy's audio library.
 
-<img src="./hardware/motherboard-back.JPG" width="200px"/>
-<img src="./hardware/motherboard-front.JPG" width="200px"/>
-<img src="./hardware/motherboard-with-expander.JPG" width="200px"/>
+<img src="./hardware/motherboard-back.JPG" width="200px"/> <img src="./hardware/motherboard-front.JPG" width="200px"/> <img src="./hardware/motherboard-with-expander.JPG" width="200px"/>
 
 ## Features
 
