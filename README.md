@@ -1,8 +1,14 @@
-# THIS IS A WIP
+![GitHub version](https://img.shields.io/github/v/release/ghostintranslation/motherboard.svg?include_prereleases)
 
 # MOTHERBOARD
 
-![GitHub version](https://img.shields.io/github/v/release/ghostintranslation/motherboard.svg?include_prereleases)
+Motherboard is a Eurorack and general modular synthesizers platform built around Teensy 4.0 that provides an easy way to build modules from a high level. 
+
+The hardware consists of one PCB that allows to build modules as small as 8HP while the firmware consists of a collection of classes compatible with Teensy's audio library.
+
+<img src="./hardware/motherboard-back.JPG" width="200px"/>
+<img src="./hardware/motherboard-front.JPG" width="200px"/>
+<img src="./hardware/motherboard-with-expander.JPG" width="200px"/>
 
 ## Features
 
@@ -15,7 +21,7 @@
 * Through hole and SMD for most footprints
 * Teensy 4.0
 
-## Introduction
+## The idea
 
 Wether analog or digital, often modules are designed from scratch as one-offs creations. This means going through the same challenges and solving them in slightly different ways. It’s possible to do better and not reinvent the wheel every time. 
 
@@ -25,7 +31,7 @@ With analog it is more difficult to achieve as the circuit is very much dependen
 
 With digital this gets interesting. The functional circuit can be completely generic and be reused for many modules, simply reading inputs and generating outputs, it doesn’t need to be designed around the final module. The low level code can be generic and reused too, while the high level code would be specific to each module.
 
-TODO: Add pictures
+
 
 ## Instructions
 

@@ -1,5 +1,11 @@
 # Hardware
 
+The PCB is made so that it is possible to use either through hole or SMD for most components.
+
+<img src="./motherboard-closeup-1.JPG" width="200px"/>
+<img src="./motherboard-closeup-2.JPG" width="200px"/>
+<img src="./motherboard-closeup-3.JPG" width="200px"/>
+
 ## Bill Of Materials
 
 ```
