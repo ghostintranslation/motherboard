@@ -16,7 +16,7 @@ The PCB is made so that it is possible to use either through hole or SMD for mos
 2 x 10k trim potentiometer
 4 x BAT43 diode
 1 x 4148 diode
-2 x SN74HC4051 multiplexer
+2 x SN74HC4851 multiplexer
 2 x SN74HC595 shift register
 2 x MCP6292 or MCP6022 op-amp
 1 x 6N137S optocoupler
@@ -44,7 +44,7 @@ Some parts could be replaced by other alternatives, consider the following:
   - high bandwidth
   - Rail-to-Rail
 
-- SN74HC4051
+- SN74HC4851
   - included inputs protection from voltages outside the supply range.
 
 - BAT43
