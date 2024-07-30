@@ -7,12 +7,12 @@
 /**
  * Rotary Encoder type of input
  * Pins should be connected this way:
- * - Out A -> 20k -> Input
+ * - Out A -> 1k -> Input
  * - Out B -> 10k -> Input
  * - The pin in the middle to GND
  * - Switch pin 1 -> Input
  * - Switch pin 2 -> GND
- * - There should be a pull up of 2k on the Input
+ * - There should be a pull up of 10k on the Input
  */
 class InputRotary : public Input, public Registrar<InputRotary>
 {
@@ -32,10 +32,12 @@ public:
 private:
     uint8_t index;
     int state = 0;
-    int16_t thresholdA = 22000;
-    int16_t thresholdB = 19000;
-    int16_t thresholdC = 15000;
-    int16_t thresholdD = -30000;
+    int8_t thresholdA = -100;
+    int8_t thresholdB = -120;
+    int8_t thresholdC = 10;
+    int8_t thresholdD = -10;
+    int8_t thresholdE = -125;
+    int8_t thresholdF = 125;
     uint16_t value;
     bool isPushed;
     elapsedMillis millisSincePushed;
@@ -60,32 +62,34 @@ inline void InputRotary::update(void)
 
 inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
 {
-
+    int8_t val = blockData[0] >> 8;
     for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
     {
-        // Serial.println(blockData[i]);
+
+        int8_t val = blockData[i] >> 8;
+
         switch (state)
         {
         case 0:
-            if (blockData[i] < thresholdA && blockData[i] > thresholdB)
+            if (val < thresholdA && val > thresholdB)
             {
                 state = 1;
                 // Serial.println(state);
             }
-            else if (blockData[i] < thresholdB && blockData[i] > thresholdC)
+            else if (val < thresholdC && val > thresholdD)
             {
                 state = -1;
                 // Serial.println(state);
             }
             break;
         case 1:
-            if (blockData[i] < thresholdC)
+            if (val < thresholdC && val > thresholdD)
             {
                 state = 2;
             }
             break;
         case -1:
-            if (blockData[i] < thresholdC)
+            if (val < thresholdA && val > thresholdB)
             {
                 state = -2;
             }
@@ -126,7 +130,7 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
             break;
         }
 
-        if (!isPushed && blockData[i] < thresholdD)
+        if (!isPushed && val < thresholdE)
         {
             isPushed = true;
             millisSincePushed = 0;
@@ -135,7 +139,7 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
                 this->onPushCallback();
             }
         }
-        else if (isPushed && blockData[i] > thresholdD)
+        else if (isPushed && val > thresholdE)
         {
             isPushed = false;
             if (this->onReleaseCallback)
@@ -158,7 +162,7 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
             }
         }
 
-        if (blockData[i] > thresholdA)
+        if (blockData[i] > thresholdF)
         {
             state = 0;
         }
