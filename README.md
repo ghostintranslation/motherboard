@@ -30,19 +30,26 @@ With analog it is more difficult to achieve as the circuit is very much dependen
 With digital this gets interesting. The functional circuit can be completely generic and be reused for many modules, simply reading inputs and generating outputs, it doesn’t need to be designed around the final module. The low level code can be generic and reused too, while the high level code would be specific to each module.
 
 
-
 ## Instructions
 
 See the hardware's and firmware's instructions under their respective folder.
 
-## TODO
+## Known issues
 
-Things I would like to explore
+- Actual inputs sampling frequency is reduced due to audible artifacts.
 
+
+## TODO list
+
+- Web editor to edit settings and maybe visualize data
+- Use the CMSIS-DSP library to perform interpolation and filtering on the ADC readings?
+- Auto calibration, does that require a digital potentiometer such as the MCP4651?
+- Adding microSD card socket to store settings, MUC2 to move to pin 8?
+- Adding an inverter chip to produce -5v out of the +5v to keep the board reliant only on +5v power but add capability of processing negative signals.
 - Can Tx detect If MIDI or CLK type of signals
 - How to Teletype I2C compatibility
-- Web editor to edit settings and maybe visualize data
-- Explore replacement of Teensy for direct integration to the board by STM32F7/Pi Pico/Linux chip/FPGA chip/...
+- TDM input and output to send/receive 16 signals over one jack
+- Explore replacement of Teensy for direct integration to the board by STM32F7, Pi Pico, Linux chip, FPGA chip,...
 
 
 # About me

@@ -79,3 +79,11 @@ I designed an audio-midi expander board that direcly attached on the back of the
 
 Simulation of the audio amplification circuit available [here](https://www.falstad.com/circuit/circuitjs.html?ctz=CQAgjCAMB0l3BWECAc0BsBOFCAsBmSTXMAdiOUmRAOQFMBaMMAKACUQGAmXK3FTlxQD+UcCC5xw0LtNxiYCFgENO6eepCbNApFTDx4E6AnhhcmUri6Z0kUpmNIDhlgHc180Q01VI7rXkqbSCWAHNOMCFwTFkmaMkBPxYAJ08aAXiRJPB4VMCC8w0g8FN8rJi4qIEisRc8tIraits6w38PH3kUKi7wXFDOzWbq-tCAY0FeDMjo0T9YQ0xlldW1xyZoMmt8UnxCBxR9hAgYOFZGnj5Mq-Bo-VcI7mnR5-0BhXyuBHQC79+wHY2nBwhIfuAgf8JJAcv5JrVhrECgt2us0StjOguGB8AhUKQbMQEKQjlBFqwAB4STD4O6yfDEO5IeQ8EAAQQArgATACWAHsADoAZz5HIALuxZgJWkwka0-DQqHoFCYAn0GN5NExfh0Cgx8LItfM1VrAelkh5Tb9fFAAla9QbbR4wEjNFDfCwqfrCCBSIIerkaBJ5AARNkAYU9kWYkVxpV6ONkLPkAGUeQA7MIAGzowqFHIADgWswBPYXKbn88sAWwL+SNmQbYkkIL5YhtvGW1DOkDAP2+zbE+BYbfMyJouKQekWWOcEn6IGHQA).
 
+
+## Known issues 
+
+In the beta version of the audio-midi expander, the audio outputs are quite noisy. To reduce noise a 0.33uF capacitor should be added on the op-amp (IC2) between GND and pin 3 for the left, and between GND and pin 5 for the right.
+
+See picture bellow:
+
+<img src="./beta-tersting-dac-fix.jpg" width="200px"/>
