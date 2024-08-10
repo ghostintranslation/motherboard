@@ -62,7 +62,6 @@ inline void InputRotary::update(void)
 
 inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
 {
-    int8_t val = blockData[0] >> 8;
     for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
     {
 

@@ -155,10 +155,10 @@ inline Input::Input(byte index)
     }
 
     // Start conversions
-    adc->adc0->startTimer(AUDIO_SAMPLE_RATE * 8);
+    adc->adc0->startTimer(AUDIO_SAMPLE_RATE * 6);
     if (inputsCount > 8)
     {
-        adc->adc1->startTimer(AUDIO_SAMPLE_RATE * 8);
+        adc->adc1->startTimer(AUDIO_SAMPLE_RATE * 6);
     }
 
     lowPassCoeff[index] = 1.0;

@@ -22,8 +22,7 @@ https://www.ghostintranslation.com/
 */
 
 #include "Audio.h"
-#include "Motherboard/OutputLed.h"
-#include "Motherboard/Input.h"
+#include "Motherboard/Motherboard.h"
 
 // Leds on indexes 0 and 1
 OutputLed *led1;
