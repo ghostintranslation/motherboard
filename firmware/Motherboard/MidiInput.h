@@ -1,33 +1,33 @@
 #ifndef MidiInput_h
 #define MidiInput_h
 
-#include <cmath>
 #include <MIDI.h>
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
 
 using MidiControlChangeCallbackFunction = void (*)(int16_t);
 
-class MidiInput : public AudioStream, public Registrar<MidiInput>
+// TODO: Add a change callback
+class MidiInput : public AudioStream
 {
 public:
     MidiInput(Setting *setting);
     void update(void);
     byte getValue();
     void setValue(byte value);
-    static void handleMidiControlChange(byte channel, byte control, byte value);
+    int16_t *getBlockData();
+    // TODO: setChannelSetting
 
-private:
-    // static IntervalTimer myTimer;
-    static void readMidi();
+protected:
     Setting *setting = nullptr;
     byte value = 0;
+    int16_t mappedValue = 0;
+    int16_t blockData[AUDIO_BLOCK_SAMPLES] = {0};
 };
-
-// IntervalTimer MidiInput::myTimer;
 
 inline MidiInput::MidiInput(Setting *setting = nullptr) : AudioStream(0, NULL)
 {
+    this->active = true;
 
     if (setting != nullptr)
     {
@@ -35,38 +35,31 @@ inline MidiInput::MidiInput(Setting *setting = nullptr) : AudioStream(0, NULL)
     }
 
     // MIDI init
-    if (MidiInput::getCount() == 1)
-    {
-        Serial.println("MidiInput::getCount() == 1");
-        MIDI.setHandleControlChange(handleMidiControlChange);
-        MIDI.begin();
-        usbMIDI.setHandleControlChange(handleMidiControlChange);
-        Serial1.begin(31250, SERIAL_8N1_RXINV);
-
-        // myTimer.begin(readMidi, 1); // read midi every 1us
-    }
+    MIDI.begin();
+    Serial1.begin(31250, SERIAL_8N1_RXINV);
 }
 
-inline void MidiInput::readMidi()
+inline void MidiInput::update(void)
 {
-    // Serial.println("readMidi");
-    // MIDI.read();
-    // usbMIDI.read();
-}
+    usbMIDI.read();
 
-inline void MidiInput::handleMidiControlChange(byte channel, byte control, byte value)
-{
-    for (unsigned int i = 0; i < MidiInput::getCount(); i++)
+    audio_block_t *block;
+
+    // allocate the audio blocks to transmit
+    block = allocate();
+
+    if (block)
     {
-        MidiInput *midiInput = MidiInput::get(i);
-        if (midiInput->setting != nullptr)
+        int16_t newMappedValue = map(this->value, 0, 127, INT16_MIN, INT16_MAX);
+        for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
         {
-            if ((!isnan(midiInput->setting->getValue()) && (byte)midiInput->setting->getValue() == control) || (isnan(midiInput->setting->getValue()) && (byte)midiInput->setting->getDefaultValue() == control))
-            {
-                Serial.println(value);
-                midiInput->setValue(value);
-            }
+            this->mappedValue = (float)this->mappedValue * 0.9 + (float)newMappedValue * 0.1;
+            block->data[i] = this->mappedValue;
+            this->blockData[i] = this->mappedValue;
         }
+
+        transmit(block, 0);
+        release(block);
     }
 }
 
@@ -80,24 +73,8 @@ inline void MidiInput::setValue(byte value)
     this->value = value;
 }
 
-inline void MidiInput::update(void)
+inline int16_t *MidiInput::getBlockData()
 {
-    audio_block_t *block;
-
-    // allocate the audio blocks to transmit
-    block = allocate();
-
-    if (block)
-    {
-        int16_t mappedValue = map(this->value, 0, 127, INT16_MIN, INT16_MAX);
-        for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
-        {
-            block->data[i] = mappedValue;
-        }
-
-        transmit(block, 0);
-        release(block);
-    }
+    return this->blockData;
 }
-
 #endif

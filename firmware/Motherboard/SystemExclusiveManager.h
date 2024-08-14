@@ -1,21 +1,21 @@
 #ifndef SystemExclusiveManager_h
 #define SystemExclusiveManager_h
 
-void printBytes(const byte *data, unsigned int size)
-{
-  while (size > 0)
-  {
-    byte b = *data++;
-    if (b < 16)
-      Serial.print(b);
-    Serial.print((char)b);
-    // Serial.print(b);
-    // if (size > 1)
-    //   Serial.print(' ');
-    size = size - 1;
-  }
-  Serial.println("");
-}
+// void printBytes(const byte *data, unsigned int size)
+// {
+//   while (size > 0)
+//   {
+//     byte b = *data++;
+//     if (b < 16)
+//       Serial.print(b);
+//     Serial.print((char)b);
+//     // Serial.print(b);
+//     // if (size > 1)
+//     //   Serial.print(' ');
+//     size = size - 1;
+//   }
+//   Serial.println("");
+// }
 
 #include "Setting.h"
 #include "lib/ArduinoJson-v7.1.0.h"
@@ -85,13 +85,12 @@ inline void SystemExclusiveManager::mySystemExclusiveChunk(const byte *data, uin
 
 inline void SystemExclusiveManager::handleSystemExclusiveMessage()
 {
-
   if (dataBufferIndex < 3)
   {
     return;
   }
 
-  printBytes(myDataBuffer, dataBufferIndex);
+  // printBytes(myDataBuffer, dataBufferIndex);
 
   // Requesting configuration
   if (myDataBuffer[1] == CONFIG_REQUEST)
@@ -126,7 +125,6 @@ inline void SystemExclusiveManager::sendConfiguration()
 
 inline void SystemExclusiveManager::receiveConfiguration(const byte *data)
 {
-  Serial.println("SystemExclusiveManager::receiveConfiguration");
   JsonDocument doc;
 
   // Trying to deserualize it to validate before saving
@@ -139,7 +137,6 @@ inline void SystemExclusiveManager::receiveConfiguration(const byte *data)
     return;
   }
 
-  // TODO: Saving
   Setting::loadFromJson(doc);
   Setting::save();
 }

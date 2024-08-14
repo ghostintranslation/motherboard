@@ -73,12 +73,10 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
             if (val < thresholdA && val > thresholdB)
             {
                 state = 1;
-                // Serial.println(state);
             }
             else if (val < thresholdC && val > thresholdD)
             {
                 state = -1;
-                // Serial.println(state);
             }
             break;
         case 1:

@@ -4,6 +4,7 @@
 #include <ADC.h>
 #include "DMAChannel.h"
 #include "AudioStream.h"
+#include "MidiInput.h"
 
 /**
    Teensy 4.0 audio library analog inputs multiplexing.
@@ -21,10 +22,13 @@ public:
     void update(void);
     virtual int16_t *&updateBefore(int16_t *&blockData) { return blockData; };
     void setLowPassCoeff(float coeff);
+    void setMidiInput(MidiInput *midiInput);
 
 private:
     byte index;
     int16_t *readBuffer();
+    MidiInput *midiInput = nullptr;
+
     static unsigned int muxIndex1;
     static unsigned int muxIndex2;
     static unsigned int inputsRealCount;
@@ -43,7 +47,6 @@ private:
     static ADC *adc;
     static DMAChannel dmaChannel1;
     static DMAChannel dmaChannel2;
-
     static uint8_t isr1Count;
     static uint8_t isr2Count;
     static uint8_t pinToChannel[4];
@@ -205,23 +208,30 @@ inline void Input::update(void)
     // allocate the audio blocks to transmit
     block = allocate();
 
-    int16_t *inputBuffer = this->readBuffer();
-
-    if (inputBuffer != NULL)
-    {
-        // Allows for derived class to alter the data before being transmitted
-        inputBuffer = this->updateBefore(inputBuffer);
-
-        // Raw output
-        if (block)
-        {
-            memcpy(block->data, inputBuffer, AUDIO_BLOCK_SAMPLES * sizeof *inputBuffer);
-            transmit(block, 0);
-        }
-    }
-
+    // Raw output
     if (block)
     {
+        int16_t *inputBuffer = this->readBuffer();
+
+        if (inputBuffer != NULL)
+        {
+            // Allows for derived class to alter the data before being transmitted
+            inputBuffer = this->updateBefore(inputBuffer);
+            memcpy(block->data, inputBuffer, AUDIO_BLOCK_SAMPLES * sizeof *inputBuffer);
+        }
+
+        if (this->midiInput != nullptr)
+        {
+            // Combining the MIDI input's value with the input's value
+            int16_t *midiBlockData = this->midiInput->getBlockData();
+
+            for (uint8_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+            {
+                block->data[i] = constrain((block->data[i] + INT16_MAX) + (midiBlockData[i] + INT16_MAX) - INT16_MAX, INT16_MIN, INT16_MAX);
+            }
+        }
+
+        transmit(block, 0);
         release(block);
     }
 }
@@ -362,5 +372,10 @@ inline void Input::addSample(uint16_t val, uint8_t inputIndex)
         headQueueTemp[inputIndex][headQueueTempCount[inputIndex]] = accumulator[inputIndex];
         headQueueTempCount[inputIndex]++;
     }
+}
+
+inline void Input::setMidiInput(MidiInput *midiInput)
+{
+    this->midiInput = midiInput;
 }
 #endif

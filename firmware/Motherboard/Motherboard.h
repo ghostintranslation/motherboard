@@ -1,7 +1,7 @@
 /*
  * Motherboard
  * Ghost In Translation
- * version: 2.0.0-beta.3
+ * version: 2.1.0
  */
 
 #ifndef Motherboard_h
@@ -13,7 +13,7 @@
 #include "InputGate.h"
 #include "InputRotary.h"
 #include "InputTrigger.h"
-#include "MidiInput.h"
+#include "MidiCCInput.h"
 #include "Output.h"
 #include "OutputGate.h"
 #include "OutputLed.h"

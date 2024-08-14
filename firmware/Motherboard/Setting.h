@@ -121,9 +121,6 @@ inline JsonDocument Setting::serializeAll(bool onlyIdandValue = false)
 
 inline void Setting::loadFromMemory()
 {
-    Serial.println("Setting::loadFromMemory");
-    Serial.println(EEPROM.length());
-
     // Find EOF index to know the length
     uint16_t eofIndex = 0;
     for (int i = 0; i < EEPROM.length(); i++)
@@ -135,7 +132,6 @@ inline void Setting::loadFromMemory()
             break;
         }
     }
-    Serial.println("");
 
     JsonDocument doc;
     EepromStream eepromStream(0, eofIndex + 1);
@@ -154,20 +150,16 @@ inline void Setting::loadFromMemory()
 
 inline void Setting::loadFromJson(JsonDocument doc)
 {
-    Serial.println("Setting::loadFromJson");
     JsonArray settings = doc["settings"];
     for (JsonVariant item : settings)
     {
         for (unsigned int i = 0; i < Setting::getCount(); i++)
         {
             Setting *setting = Setting::get(i);
-            // Serial.println((String)item["id"]);
-            // Serial.println(setting->get(i)->getId());
-            // Serial.println("");
             if (item["id"] == setting->get(i)->getId())
             {
-                // Serial.println("Setting::loadFromJson 2");
                 setting->setValue(item["value"]);
+                // TODO: Add callback on value change
             }
         }
     }
@@ -175,15 +167,10 @@ inline void Setting::loadFromJson(JsonDocument doc)
 
 inline void Setting::save()
 {
-    Serial.println("Setting::save");
-    Serial.println(EEPROM.length());
-
     EepromStream eepromStream(0, EEPROM.length());
 
     JsonDocument doc = Setting::serializeAll(true);
     uint16_t length = serializeJson(doc, eepromStream);
-    Serial.printf("Serialized length: %d", length);
-    Serial.println("");
     EEPROM.write(length, 26); // End of file char
 }
 
