@@ -14,6 +14,7 @@
 #include "InputRotary.h"
 #include "InputTrigger.h"
 #include "MidiCCInput.h"
+#include "MidiCCOutput.h"
 #include "Output.h"
 #include "OutputGate.h"
 #include "OutputLed.h"

@@ -1,47 +1,28 @@
 #ifndef MidiInput_h
 #define MidiInput_h
 
-#include <MIDI.h>
-
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
-
-using MidiControlChangeCallbackFunction = void (*)(int16_t);
+#include "MidiIO.h"
 
 // TODO: Add a change callback
-class MidiInput : public AudioStream
+using MidiControlChangeCallbackFunction = void (*)(int16_t);
+
+class MidiInput : public MidiIO, public AudioStream
 {
 public:
     MidiInput(Setting *setting);
     void update(void);
-    byte getValue();
-    void setValue(byte value);
     int16_t *getBlockData();
     // TODO: setChannelSetting
-
-protected:
-    Setting *setting = nullptr;
-    byte value = 0;
-    int16_t mappedValue = 0;
-    int16_t blockData[AUDIO_BLOCK_SAMPLES] = {0};
 };
 
-inline MidiInput::MidiInput(Setting *setting = nullptr) : AudioStream(0, NULL)
+inline MidiInput::MidiInput(Setting *setting = nullptr) : MidiIO(setting), AudioStream(0, NULL)
 {
     this->active = true;
-
-    if (setting != nullptr)
-    {
-        this->setting = setting;
-    }
-
-    // MIDI init
-    MIDI.begin();
-    Serial1.begin(31250, SERIAL_8N1_RXINV);
 }
 
 inline void MidiInput::update(void)
 {
-    usbMIDI.read();
+    MidiIO::update();
 
     audio_block_t *block;
 
@@ -61,16 +42,6 @@ inline void MidiInput::update(void)
         transmit(block, 0);
         release(block);
     }
-}
-
-inline byte MidiInput::getValue()
-{
-    return this->value;
-}
-
-inline void MidiInput::setValue(byte value)
-{
-    this->value = value;
 }
 
 inline int16_t *MidiInput::getBlockData()
