@@ -12,7 +12,7 @@ public:
     void update(void);
     byte getValue();
     void setValue(byte value);
-    // int16_t *getBlockData();
+    int16_t *getBlockData();
     // TODO: setChannelSetting
 
 protected:
@@ -47,8 +47,8 @@ inline void MidiIO::setValue(byte value)
     this->value = value;
 }
 
-// inline int16_t *MidiIO::getBlockData()
-// {
-//     return this->blockData;
-// }
+inline int16_t *MidiIO::getBlockData()
+{
+    return this->blockData;
+}
 #endif

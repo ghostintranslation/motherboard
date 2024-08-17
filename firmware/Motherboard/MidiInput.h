@@ -11,7 +11,6 @@ class MidiInput : public MidiIO, public AudioStream
 public:
     MidiInput(Setting *setting);
     void update(void);
-    int16_t *getBlockData();
     // TODO: setChannelSetting
 };
 
@@ -42,10 +41,5 @@ inline void MidiInput::update(void)
         transmit(block, 0);
         release(block);
     }
-}
-
-inline int16_t *MidiInput::getBlockData()
-{
-    return this->blockData;
 }
 #endif

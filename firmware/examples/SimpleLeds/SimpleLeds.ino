@@ -34,6 +34,9 @@ Input *input1;
 Input *input2;
 // A sine oscillator
 AudioSynthWaveformModulated *sine1;
+// Midi inputs
+MidiCCInput *midiInput1;
+MidiNoteInput *midiInput2;
 // Midi CC outputs
 MidiCCOutput *midiOutput1;
 MidiCCOutput *midiOutput2;
@@ -51,8 +54,12 @@ void setup()
   // Audio connections require memory to work.
   AudioMemory(40);
 
+  midiInput1 = new MidiCCInput(1); //C1
+  midiInput2 = new MidiNoteInput(36); //C1
   input1 = new Input(0);
+  input1->setMidiInput(midiInput1);
   input2 = new Input(1);
+  input2->setMidiInput(midiInput2);
   led1 = new OutputLed(0);
   led2 = new OutputLed(1);
   // Setting up the sine1 oscillator
