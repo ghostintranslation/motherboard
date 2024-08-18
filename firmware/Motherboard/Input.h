@@ -128,7 +128,7 @@ inline Input::Input(byte index)
     adc->adc0->enableDMA();
     adc->adc0->startSingleRead(A0);
 
-    dmaChannel1.source((volatile uint16_t &)(ADC1_R0));
+    dmaChannel1.source(ADC1_R0);
     dmaChannel1.destination((volatile uint16_t &)adc1Val);
     dmaChannel1.transferSize(2);
     dmaChannel1.transferCount(1);
@@ -147,7 +147,7 @@ inline Input::Input(byte index)
         adc->adc1->enableDMA();
         adc->adc1->startSingleRead(A1);
 
-        dmaChannel2.source((volatile uint16_t &)(ADC2_R0));
+        dmaChannel2.source(ADC2_R0);
         dmaChannel2.destination((volatile uint16_t &)adc2Val);
         dmaChannel2.transferSize(2);
         dmaChannel2.transferCount(1);

@@ -16,8 +16,6 @@ public:
     byte getMin();
     byte getMax();
     byte getNote();
-    static void handleMidiNoteOn(byte channel, byte control, byte velocity);
-    static void handleMidiNoteOff(byte channel, byte control, byte velocity);
 
 private:
     byte min = 0;
@@ -25,24 +23,14 @@ private:
     byte note = 0;
 };
 
-inline MidiNoteInput::MidiNoteInput(Setting *setting = nullptr) : MidiInput(setting)
+inline MidiNoteInput::MidiNoteInput(Setting *setting) : MidiInput(setting)
 {
-    MIDI.setHandleNoteOn(handleMidiNoteOn);
-    MIDI.setHandleNoteOff(handleMidiNoteOff);
-    usbMIDI.setHandleNoteOn(handleMidiNoteOn);
-    usbMIDI.setHandleNoteOff(handleMidiNoteOff);
-
     // TODO: this->note = noteSetting->getValue() ?
     // Could make things easier but would require a reboot after settings change
 }
 
 inline MidiNoteInput::MidiNoteInput(byte note) : MidiInput(nullptr)
 {
-    MIDI.setHandleNoteOn(handleMidiNoteOn);
-    MIDI.setHandleNoteOff(handleMidiNoteOff);
-    usbMIDI.setHandleNoteOn(handleMidiNoteOn);
-    usbMIDI.setHandleNoteOff(handleMidiNoteOff);
-
     this->note = note;
 }
 
@@ -81,32 +69,6 @@ inline byte MidiNoteInput::getMax()
 inline byte MidiNoteInput::getNote()
 {
     return this->note;
-}
-
-
-inline void MidiNoteInput::handleMidiNoteOn(byte channel, byte note, byte velocity)
-{
-    for (unsigned int i = 0; i < MidiNoteInput::getCount(); i++)
-    {
-        MidiNoteInput *midiInput = MidiNoteInput::get(i);
-        byte mappedValue = map(velocity, 0, 127, midiInput->getMin(), midiInput->getMax());
-
-        if (midiInput->setting != nullptr)
-        {
-            if ((!isnan(midiInput->setting->getValue()) && (byte)midiInput->setting->getValue() == note) || (isnan(midiInput->setting->getValue()) && (byte)midiInput->setting->getDefaultValue() == note))
-            {
-                midiInput->setValue(mappedValue);
-            }
-        }else if (note == midiInput->getNote())
-        {
-            midiInput->setValue(mappedValue);
-        }
-    }
-}
-
-inline void MidiNoteInput::handleMidiNoteOff(byte channel, byte note, byte velocity)
-{
-    MidiNoteInput::handleMidiNoteOn(channel, note, 0);
 }
 
 #endif

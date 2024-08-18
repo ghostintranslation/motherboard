@@ -1,18 +1,14 @@
 #ifndef MidiIO_h
 #define MidiIO_h
 
-#include <MIDI.h>
-
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
-
 class MidiIO
 {
 public:
     MidiIO(Setting *setting);
-    void update(void);
     byte getValue();
     void setValue(byte value);
     int16_t *getBlockData();
+    Setting *getSetting();
     // TODO: setChannelSetting
 
 protected:
@@ -25,16 +21,6 @@ protected:
 inline MidiIO::MidiIO(Setting *setting = nullptr)
 {
     this->setting = setting;
-
-    // MIDI init
-    MIDI.begin();
-    Serial1.begin(31250, SERIAL_8N1_RXINV);
-}
-
-inline void MidiIO::update(void)
-{
-    usbMIDI.read();
-    MIDI.read();
 }
 
 inline byte MidiIO::getValue()
@@ -50,5 +36,10 @@ inline void MidiIO::setValue(byte value)
 inline int16_t *MidiIO::getBlockData()
 {
     return this->blockData;
+}
+
+inline Setting *MidiIO::getSetting()
+{
+    return this->setting;
 }
 #endif

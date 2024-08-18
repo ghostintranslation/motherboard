@@ -48,7 +48,7 @@ uint32_t SystemExclusiveManager::dataBufferIndex = 0;
 inline SystemExclusiveManager::SystemExclusiveManager()
 {
   // myDataBuffer = new byte[1080];
-  usbMIDI.setHandleSystemExclusive(SystemExclusiveManager::mySystemExclusiveChunk);
+  usbMIDI.setHandleSystemExclusive(SystemExclusiveManager::mySystemExclusiveChunk); // TODO: maybe move this to MidiManager
 }
 
 /**

@@ -21,8 +21,6 @@ inline MidiInput::MidiInput(Setting *setting = nullptr) : MidiIO(setting), Audio
 
 inline void MidiInput::update(void)
 {
-    MidiIO::update();
-
     audio_block_t *block;
 
     // allocate the audio blocks to transmit

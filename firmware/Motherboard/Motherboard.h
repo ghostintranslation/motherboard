@@ -13,9 +13,10 @@
 #include "InputGate.h"
 #include "InputRotary.h"
 #include "InputTrigger.h"
-#include "MidiCCInput.h"
-#include "MidiNoteInput.h"
-#include "MidiCCOutput.h"
+// #include "MidiCCInput.h"
+// #include "MidiNoteInput.h"
+// #include "MidiCCOutput.h"
+#include "MidiManager.h"
 #include "Output.h"
 #include "OutputGate.h"
 #include "OutputLed.h"
@@ -40,6 +41,7 @@ Motherboard *Motherboard::instance = nullptr;
 
 inline Motherboard::Motherboard()
 {
+    MidiManager::getInstance();
     SystemExclusiveManager::getInstance();
 }
 

@@ -27,18 +27,12 @@ private:
 
 inline MidiCCInput::MidiCCInput(Setting *ccSetting) : MidiInput(ccSetting)
 {
-    MIDI.setHandleControlChange(handleMidiControlChange);
-    usbMIDI.setHandleControlChange(handleMidiControlChange);
-
     // TODO: this->control = ccSetting->getValue() ?
     // Could make things easier but would require a reboot after settings change
 }
 
 inline MidiCCInput::MidiCCInput(byte control) : MidiInput(nullptr)
 {
-    MIDI.setHandleControlChange(handleMidiControlChange);
-    usbMIDI.setHandleControlChange(handleMidiControlChange);
-
     this->control = control;
 }
 
@@ -77,28 +71,6 @@ inline byte MidiCCInput::getMax()
 inline byte MidiCCInput::getControl()
 {
     return this->control;
-}
-
-inline void MidiCCInput::handleMidiControlChange(byte channel, byte control, byte value)
-{
-
-    for (unsigned int i = 0; i < MidiCCInput::getCount(); i++)
-    {
-        MidiCCInput *midiInput = MidiCCInput::get(i);
-        byte mappedValue = map(value, 0, 127, midiInput->getMin(), midiInput->getMax());
-        
-        if (midiInput->setting != nullptr)
-        {
-            if ((!isnan(midiInput->setting->getValue()) && (byte)midiInput->setting->getValue() == control) || (isnan(midiInput->setting->getValue()) && (byte)midiInput->setting->getDefaultValue() == control))
-            {
-                midiInput->setValue(mappedValue);
-            }
-        }
-        else if (control == midiInput->getControl())
-        {
-            midiInput->setValue(mappedValue);
-        }
-    }
 }
 
 #endif

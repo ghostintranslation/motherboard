@@ -9,7 +9,7 @@ public:
     MidiOutput(Setting *setting);
     void update(void);
     virtual void send() = 0;
-    
+
 private:
     uint32_t testval = 0;
     audio_block_t *inputQueueArray[1];
@@ -22,8 +22,6 @@ inline MidiOutput::MidiOutput(Setting *setting = nullptr) : MidiIO(setting), Aud
 
 inline void MidiOutput::update(void)
 {
-    MidiIO::update();
-
     // Receive input data
     audio_block_t *block;
     block = receiveReadOnly(0);
@@ -34,7 +32,8 @@ inline void MidiOutput::update(void)
         byte newValue = (this->mappedValue + INT16_MAX) >> 9;
         // Serial.println((this->mappedValue + INT16_MAX) >> 9);
 
-        if(newValue != this->value){
+        if (newValue != this->value)
+        {
             this->value = newValue;
             this->send();
         }
