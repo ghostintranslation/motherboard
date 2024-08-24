@@ -33,7 +33,7 @@ inline MidiManager::MidiManager() : AudioStream(0, NULL)
 
     // MIDI init
     MIDI.begin();
-    Serial1.begin(31250,  SERIAL_8N1_TXINV);
+    Serial1.begin(31250, SERIAL_8N1_TXINV);
 
     // Callbacks
     MIDI.setHandleControlChange(handleMidiControlChange);

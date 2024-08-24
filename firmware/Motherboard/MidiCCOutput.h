@@ -72,7 +72,8 @@ inline byte MidiCCOutput::getControl()
 
 inline void MidiCCOutput::send()
 {
-   usbMIDI.sendControlChange(this->control, this->value, 0);
+   usbMIDI.sendControlChange(this->control, this->value, 1);
+   MIDI.sendControlChange(this->control, this->value, 1);
 }
 
 #endif

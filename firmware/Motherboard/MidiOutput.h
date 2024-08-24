@@ -30,7 +30,6 @@ inline void MidiOutput::update(void)
     {
         this->mappedValue = (float)this->mappedValue * 0.95 + (float)block->data[0] * 0.05;
         byte newValue = (this->mappedValue + INT16_MAX) >> 9;
-        // Serial.println((this->mappedValue + INT16_MAX) >> 9);
 
         if (newValue != this->value)
         {
