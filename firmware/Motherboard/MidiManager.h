@@ -32,7 +32,7 @@ inline MidiManager::MidiManager() : AudioStream(0, NULL)
     this->active = true;
 
     // MIDI init
-    MIDI.begin();
+    MIDI.begin(MIDI_CHANNEL_OMNI);
     Serial1.begin(31250, SERIAL_8N1_TXINV);
 
     // Callbacks
