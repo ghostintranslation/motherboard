@@ -3,7 +3,7 @@ Simple calibration helper.
 
 On the Motherboard:
 - connect a wire from 5v to IN 1
-- connect a wire from 5v to IN 2.
+- connect a wire from 5v to IN 9.
 - connect a LED on OUT 1 and a resistor to GND
 - connect a LED on OUT 2 and a resistor to GND
 
@@ -29,7 +29,8 @@ https://www.ghostintranslation.com/
 */
 
 #include "Audio.h"
-#include "Motherboard/Motherboard.h"
+#include "Motherboard/InputGate.h"
+#include "Motherboard/OutputLed.h"
 
 // Inputs of the first ADC
 // Currently the second ADC is used only if there is more than 8 inputs
