@@ -6,7 +6,7 @@ Motherboard is a Eurorack and general modular synthesizers platform built around
 
 The hardware consists of one PCB that allows to build modules as small as 8HP while the firmware consists of a collection of classes compatible with Teensy's audio library.
 
-<img src="./hardware/motherboard-back.JPG" width="200px"/> <img src="./hardware/motherboard-front.JPG" width="200px"/> <img src="./hardware/motherboard-with-expander.JPG" width="200px"/>
+<img src="./hardware/motherboard-1.WEBP" width="200px"/> <img src="./hardware/motherboard-2.WEBP" width="200px"/>
 
 ## Features
 
@@ -53,7 +53,12 @@ See the hardware's and firmware's instructions under their respective folder.
 
 
 # About me
-You can find me on Bandcamp, Instagram, Youtube:
+
+You can buy PCBs on my website:
+
+https://www.ghostintranslation.com/
+
+You can also find me on Bandcamp, Instagram, Youtube:
 
 https://ghostintranslation.bandcamp.com/
 
@@ -61,15 +66,11 @@ https://www.instagram.com/ghostintranslation/
 
 https://www.youtube.com/ghostintranslation
 
-
-# Support
 To support my work:
 
-https://www.patreon.com/ghostintranslation
-
-https://www.paypal.com/paypalme/ghostintranslation
-
 https://www.buymeacoffee.com/ghostintranslation
+
+https://ko-fi.com/ghostintranslation
 
 # License
 
