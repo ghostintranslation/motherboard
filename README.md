@@ -68,9 +68,13 @@ https://www.youtube.com/ghostintranslation
 
 To support my work:
 
+https://ko-fi.com/ghostintranslation
+
 https://www.buymeacoffee.com/ghostintranslation
 
-https://ko-fi.com/ghostintranslation
+https://liberapay.com/ghostintranslation
+
+https://github.com/sponsors/ghostintranslation
 
 # License
 
