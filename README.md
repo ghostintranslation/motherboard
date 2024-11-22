@@ -58,7 +58,7 @@ You can buy PCBs on my website:
 
 https://www.ghostintranslation.com/
 
-You can also find me on Bandcamp, Instagram, Youtube:
+You can also find me on Bandcamp, Instagram, YouTube:
 
 https://ghostintranslation.bandcamp.com/
 
