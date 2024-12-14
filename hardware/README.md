@@ -4,44 +4,45 @@ The PCB is made so that it is possible to use either through hole or SMD for mos
 
 ## Bill Of Materials
 
-**Motherboard**
+### Motherboard
 
-```
-4 x 10k resistor
-2 x 2.7k resistor
-3 x 2k resistor
-2 x 1k resistor
-1 x 157ohm resistor
-2 x 10k trim potentiometer
-4 x BAT43 diode
-1 x 4148 diode
-2 x SN74HC4851 multiplexer
-2 x SN74HC595 shift register
-2 x MCP6292 or MCP6022 op-amp
-1 x 6N137S optocoupler
-1 x MB1S bridge rectifier
-1 x VX7805-500 DC-DC converter
-1 x 10uf capacitor
-1 x 22uf capacitor
-2 x 24 pins female header
-2 x 14 pins female header
-2 x 8 pins female header
-1 x 4 pins female header
-2 x 5 pins male header
-4 x 16 pins IC socket
-2 x 8 pins IC socket
-```
+Note: A Mouser list of parts file that can be imported on the website is available in this folder.
 
-An export of the BOM out of Eagle is available in this repo.
+| Qty | Description                | Ref                | SMD package       | TH available |
+|-----|----------------------------|--------------------|-------------------|--------------|
+| 4   | 10k resistor               | R1, R3, R10, R13   | 0805              | Yes          |
+| 2   | 2.7k resistor              | R2, R11            | 0805              | Yes          |
+| 3   | 2k resistor                | R6, R7, R8         | 0805              | Yes          |
+| 2   | 1k resistor                | R4, R12            | 0805              | Yes          |
+| 1   | ~157 resistor              | R5                 | 0805              | Yes          |
+| 2   | 10k trim potentiometer     | R9, R14            | 0805              | Yes          |
+| 4   | BAT43 diode                | D1, D2, D3, D4     | SOD-323 / SOD-123 | Yes          |
+| 1   | 4148 diode                 | D5                 | SOD-323 / SOD-123 | Yes          |
+| 1   | 10uf capacitor             | C1                 | 0805              | Yes          |
+| 1   | 22uf capacitor             | C2                 | 0805              | Yes          |
+| 2   | SN74HC4851 multiplexer     | IC1, IC3           | 16-TSSOP          | Yes          |
+| 2   | SN74HC595 shift register   | IC2, IC4           | 16-TSSOP          | Yes          |
+| 2   | MCP6292 / MCP6022 op-amp   | IC5, IC6           | 8-SOIC            | Yes          |
+| 1   | 6N137S optocoupler         | OPTOCOUPLER        | 8-SOIC            | No           |
+| 1   | MB1S bridge rectifier      | B1                 | 4-SOIC            | No           |
+| 1   | VX7805-500 DC-DC converter | CONVERTER          | -                 | Yes          |
+| 2   | 24 pins female header      | JP4, JP5           | -                 | Yes          |
+| 2   | 14 pins female header      | TEENSY             | -                 | Yes          |
+| 2   | 8 pins female header       | JP2                | -                 | Yes          |
+| 2   | 4 pins female header       | JP1                | -                 | Yes          |
+| 2   | 5 pins male header         | POWER              | -                 | Yes          |
+| 4   | 16 pins IC socket (TH only)| IC1, IC2, IC3, IC4 | -                 | -            |
+| 2   | 8 pins IC socket (TH only) | IC5, IC6           | -                 | -            |
 
-**Audio-MIDI Expander**
+### Audio-MIDI Expander
 
-```
-3 x stereo Thonkicon jack socket
-2 x mono Thonkicon jack socket
-2 x 8 pins male header
-1 x 4 pins male header
-```
+| Qty | Description                  | Ref                       | SMD package | TH available |
+|-----|------------------------------|---------------------------|-------------|--------------|
+| 3   | Stereo Thonkicon jack socket | Stereo, MIDI_OUT, MIDI_IN | -           | Yes          |       
+| 2   | Mono Thonkicon jack socket   | L, R                      | -           | Yes          |       
+| 2   | 8 pins male header           | -                         | -           | Yes          |       
+| 1   | 4 pins male header           | -                         | -           | Yes          |       
+
 
 ### Notes
 
