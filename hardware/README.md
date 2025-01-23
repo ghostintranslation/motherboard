@@ -60,9 +60,7 @@ Some parts could be replaced by other alternatives, consider the following:
 - BAT43
   - I only tried 2N4007 – *Be careful they protect the Teensy from frying in case of voltages outside 0-3.3v ± the forward voltage, which should not exceed 0.7v*
 
-- VX7805-500 is obsolete and I haven't tried any replacement yet, potential candidates:
-  - R-78CK5.0-0.5
-  - R-78K5.0-0.5
+- VX7805-500 is obsolete and can be replaced by Recom Power R-78K5.0-0.5 or R-78E5.0-0.5 or similar.
 
 - If you don't wish to use MIDI you can omit:
   - the optocoupler and its resistors and diode
@@ -88,4 +86,4 @@ I designed an audio-midi expander board that direcly attached on the back of the
 
 ## Known issues 
 
-In some versions of the audio-midi expander, the audio outputs are quite noisy. To reduce noise I added a through hole 0.33uF capacitor myself. This will be fixed in future batches.
+In some earlier versions of the audio-midi expander, the audio outputs are quite noisy. To reduce noise I added a through hole 0.33uF capacitor myself. This is fixed in later batches.
