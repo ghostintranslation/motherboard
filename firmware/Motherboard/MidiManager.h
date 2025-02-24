@@ -108,6 +108,11 @@ inline void MidiManager::handleMidiNoteOn(byte channel, byte note, byte velocity
     {
         MidiNotesInput *midiInput = MidiNotesInput::get(i);
         midiInput->setValue(note);
+        if(velocity > 0){
+            midiInput->noteOn(note, velocity);
+        }else{
+            midiInput->noteOff(note);
+        }
     }
 }
 

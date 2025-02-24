@@ -13,6 +13,7 @@
 #include "InputGate.h"
 #include "InputRotary.h"
 #include "InputTrigger.h"
+#include "InputQuantized.h"
 // #include "MidiCCInput.h"
 // #include "MidiNoteInput.h"
 // #include "MidiCCOutput.h"
@@ -41,6 +42,7 @@ Motherboard *Motherboard::instance = nullptr;
 
 inline Motherboard::Motherboard()
 {
+    // TODO: If this class only instanciate classes, just instanciate the classes
     MidiManager::getInstance();
     SystemExclusiveManager::getInstance();
 }

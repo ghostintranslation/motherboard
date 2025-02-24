@@ -125,7 +125,7 @@ inline void Setting::loadFromMemory()
     uint16_t eofIndex = 0;
     for (int i = 0; i < EEPROM.length(); i++)
     {
-        Serial.print((char)EEPROM.read(i));
+        // Serial.print((char)EEPROM.read(i));
         if (EEPROM.read(i) == 26)
         {
             eofIndex = i;
