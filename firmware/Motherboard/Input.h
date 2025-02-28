@@ -163,10 +163,12 @@ inline Input::Input(byte index)
     }
 
     // Start conversions
-    adc->adc0->startTimer(AUDIO_SAMPLE_RATE * 8);
+    // TODO: Should be AUDIO_SAMPLE_RATE * 8 to reach 44.1kHz sampling per input,
+    // but it becomes noisy. Possibly too fast for the Teensy, missing samples, could interpolation fix it?
+    adc->adc0->startTimer(AUDIO_SAMPLE_RATE * 6);
     if (inputsCount > 8)
     {
-        adc->adc1->startTimer(AUDIO_SAMPLE_RATE * 8);
+        adc->adc1->startTimer(AUDIO_SAMPLE_RATE * 6);
     }
 
     lowPassCoeff[index] = 0.0005;
