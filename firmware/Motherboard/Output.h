@@ -124,7 +124,7 @@ inline void Output::timerCallback()
             }
         }
 
-        SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0)); // 50000000
+        SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
 
         // Set the latch to low (activate the shift registers)
         digitalWriteFast(REGISTERS_LATCH_PIN, LOW);

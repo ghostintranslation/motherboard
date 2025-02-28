@@ -1,47 +1,43 @@
 #ifndef MidiInput_h
 #define MidiInput_h
 
-#include "AudioStream.h"
-#include <MIDI.h>
+#include "MidiIO.h"
 
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // MIDI library init
-
+// TODO: Add a change callback
 using MidiControlChangeCallbackFunction = void (*)(int16_t);
 
-class MidiInput : public AudioStream
+class MidiInput : public MidiIO, public AudioStream
 {
 public:
-    MidiInput();
+    MidiInput(Setting *setting);
     void update(void);
-
-private:
-    static IntervalTimer myTimer;
-    static void handleMidiControlChange(byte channel, byte control, byte value);
+    // TODO: setChannelSetting
 };
 
-IntervalTimer MidiInput::myTimer;
-
-inline MidiInput::MidiInput()
-    : AudioStream(0, NULL)
+inline MidiInput::MidiInput(Setting *setting = nullptr) : MidiIO(setting), AudioStream(0, NULL)
 {
-
-    // MIDI init
-    MIDI.setHandleControlChange(handleMidiControlChange);
-    MIDI.begin();
-    // usbMIDI.setHandleControlChange(handleMidiControlChange);
-
-    Serial1.begin(31250, SERIAL_8N1_RXINV);
-
-    myTimer.begin(readMidi, 1); // read midi every 1us
+    this->active = true;
 }
 
 inline void MidiInput::update(void)
 {
-}
+    audio_block_t *block;
 
-inline void MidiInput::readMidi()
-{
-    MIDI.read();
-}
+    // allocate the audio blocks to transmit
+    block = allocate();
 
+    if (block)
+    {
+        int16_t newMappedValue = map(this->value, 0, 127, INT16_MIN, INT16_MAX);
+        for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+        {
+            this->mappedValue = (float)this->mappedValue * 0.9 + (float)newMappedValue * 0.1;
+            block->data[i] = this->mappedValue;
+            this->blockData[i] = this->mappedValue;
+        }
+
+        transmit(block, 0);
+        release(block);
+    }
+}
 #endif

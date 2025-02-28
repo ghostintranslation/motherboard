@@ -20,8 +20,7 @@ https://www.ghostintranslation.com/
 */
 
 #include "Audio.h"
-#include "Motherboard/InputRotary.h"
-#include "Motherboard/OutputLed.h"
+#include "Motherboard/Motherboard.h"
 
 // Input of type Rotary
 InputRotary *input1;

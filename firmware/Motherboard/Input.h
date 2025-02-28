@@ -4,6 +4,7 @@
 #include <ADC.h>
 #include "DMAChannel.h"
 #include "AudioStream.h"
+#include "MidiInput.h"
 
 /**
    Teensy 4.0 audio library analog inputs multiplexing.
@@ -21,10 +22,14 @@ public:
     void update(void);
     virtual int16_t *&updateBefore(int16_t *&blockData) { return blockData; };
     void setLowPassCoeff(float coeff);
+    void setMidiInput(MidiInput *midiInput);
+    void onChange(void (*onChangeCallback)(int16_t value));
 
-private:
+protected:
     byte index;
     int16_t *readBuffer();
+    MidiInput *midiInput = nullptr;
+
     static unsigned int muxIndex1;
     static unsigned int muxIndex2;
     static unsigned int inputsRealCount;
@@ -34,6 +39,7 @@ private:
     static const unsigned int inputsMax = 32;
     static const unsigned int maxBuffers = 8;
     static float accumulator[inputsMax];
+    static float prevAccumulator[inputsMax];
     static float lowPassCoeff[inputsMax];
     static int16_t queue[inputsMax][maxBuffers][AUDIO_BLOCK_SAMPLES];
     static uint16_t head[inputsMax];
@@ -43,7 +49,6 @@ private:
     static ADC *adc;
     static DMAChannel dmaChannel1;
     static DMAChannel dmaChannel2;
-
     static uint8_t isr1Count;
     static uint8_t isr2Count;
     static uint8_t pinToChannel[4];
@@ -54,6 +59,8 @@ private:
     static void iterateMux2();
     static uint16_t adc1Val;
     static uint16_t adc2Val;
+
+    void (*onChangeCallback)(int16_t value) = nullptr;
 };
 
 // Static initializations
@@ -70,6 +77,7 @@ uint16_t Input::headQueueTempCount[inputsMax] = {0};
 int16_t Input::headQueueTemp[inputsMax][AUDIO_BLOCK_SAMPLES] = {{0}};
 uint16_t Input::tail[inputsMax] = {0};
 float Input::accumulator[inputsMax] = {0};
+float Input::prevAccumulator[inputsMax] = {0};
 float Input::lowPassCoeff[inputsMax] = {1.0f};
 ADC *Input::adc = nullptr;
 DMAChannel Input::dmaChannel1;
@@ -163,8 +171,10 @@ inline Input::Input(byte index)
         adc->adc1->startTimer(AUDIO_SAMPLE_RATE * 6);
     }
 
-    lowPassCoeff[index] = 0.1;
-    accumulator[index] = 0;
+    lowPassCoeff[index] = 0.0005;
+    accumulator[index] = INT16_MIN;
+    headQueueTemp[index][0] = INT16_MIN;
+    prevAccumulator[index] = 0;
 }
 
 inline void Input::update(void)
@@ -207,23 +217,36 @@ inline void Input::update(void)
     // allocate the audio blocks to transmit
     block = allocate();
 
-    int16_t *inputBuffer = this->readBuffer();
-
-    if (inputBuffer != NULL)
-    {
-        // Allows for derived class to alter the data before being transmitted
-        inputBuffer = this->updateBefore(inputBuffer);
-
-        // Raw output
-        if (block)
-        {
-            memcpy(block->data, inputBuffer, AUDIO_BLOCK_SAMPLES * sizeof *inputBuffer);
-            transmit(block, 0);
-        }
-    }
-
+    // Raw output
     if (block)
     {
+        int16_t *inputBuffer = this->readBuffer();
+
+        if (inputBuffer != NULL)
+        {
+            // Allows for derived class to alter the data before being transmitted
+            inputBuffer = this->updateBefore(inputBuffer);
+            memcpy(block->data, inputBuffer, AUDIO_BLOCK_SAMPLES * sizeof *inputBuffer);
+
+            if (this->onChangeCallback && prevAccumulator[this->index] != accumulator[this->index])
+            {
+                this->onChangeCallback(accumulator[this->index]);
+                prevAccumulator[this->index] = accumulator[this->index];
+            }
+        }
+
+        if (this->midiInput != nullptr)
+        {
+            // Combining the MIDI input's value with the input's value
+            int16_t *midiBlockData = this->midiInput->getBlockData();
+
+            for (uint8_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+            {
+                block->data[i] = constrain((block->data[i] + INT16_MAX) + (midiBlockData[i] + INT16_MAX) - INT16_MAX, INT16_MIN, INT16_MAX);
+            }
+        }
+
+        transmit(block, 0);
         release(block);
     }
 }
@@ -365,4 +388,15 @@ inline void Input::addSample(uint16_t val, uint8_t inputIndex)
         headQueueTempCount[inputIndex]++;
     }
 }
+
+inline void Input::setMidiInput(MidiInput *midiInput)
+{
+    this->midiInput = midiInput;
+}
+
+inline void Input::onChange(void (*onChangeCallback)(int16_t value))
+{
+    this->onChangeCallback = onChangeCallback;
+}
+
 #endif

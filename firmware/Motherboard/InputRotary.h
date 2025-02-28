@@ -28,6 +28,8 @@ public:
     void onRelease(void (*onReleaseCallback)());
     void onClick(void (*onClickCallback)());
     void onLongClick(void (*onLongClickCallback)());
+    void setMin(int16_t min);
+    void setMax(int16_t max);
 
 private:
     uint8_t index;
@@ -38,7 +40,9 @@ private:
     int8_t thresholdD = -10;
     int8_t thresholdE = -125;
     int8_t thresholdF = 125;
-    uint16_t value;
+    int16_t value = 0;
+    int16_t min = INT16_MIN;
+    int16_t max = INT16_MAX;
     bool isPushed;
     elapsedMillis millisSincePushed;
     void (*onChangeCallback)(uint16_t value) = nullptr;
@@ -62,7 +66,6 @@ inline void InputRotary::update(void)
 
 inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
 {
-    int8_t val = blockData[0] >> 8;
     for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
     {
 
@@ -74,12 +77,10 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
             if (val < thresholdA && val > thresholdB)
             {
                 state = 1;
-                // Serial.println(state);
             }
             else if (val < thresholdC && val > thresholdD)
             {
                 state = -1;
-                // Serial.println(state);
             }
             break;
         case 1:
@@ -95,7 +96,7 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
             }
             break;
         case 2:
-            if (value < UINT16_MAX)
+            if (value < this->max)
             {
                 value++;
             }
@@ -112,7 +113,7 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
             }
             break;
         case -2:
-            if (value > 0)
+            if (value > this->min)
             {
                 value--;
             }
@@ -168,6 +169,11 @@ inline int16_t *&InputRotary::updateBefore(int16_t *&blockData)
         }
     }
 
+    for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
+    {
+        blockData[i] = map(value, this->min, this->max, INT16_MIN, INT16_MAX);
+    }
+
     return blockData;
 }
 
@@ -210,5 +216,15 @@ inline void InputRotary::onClick(void (*onClickCallback)())
 inline void InputRotary::onLongClick(void (*onLongClickCallback)())
 {
     this->onLongClickCallback = onLongClickCallback;
+}
+
+inline void InputRotary::setMin(int16_t min)
+{
+    this->min = min;
+}
+
+inline void InputRotary::setMax(int16_t max)
+{
+    this->max = max;
 }
 #endif

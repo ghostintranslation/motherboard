@@ -15,6 +15,7 @@ The hardware consists of one PCB that allows to build modules as small as 8HP wh
 * 2 audio channels over I2S or 8 channels over TDM
 * I2C to expand with analog outputs and more
 * MIDI in and out
+* Configurable via JSON over MIDI SysEx
 * 10 pin Eurorack either way power
 * Through hole and SMD for most footprints
 * Teensy 4.0
