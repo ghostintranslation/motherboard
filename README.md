@@ -1,24 +1,16 @@
-![GitHub version](https://img.shields.io/github/v/release/ghostintranslation/motherboard.svg?include_prereleases)
+# Motherboard
 
-# MOTHERBOARD
-
-Motherboard is a Eurorack and general modular synthesizers platform built around Teensy 4.0 that provides an easy way to build modules from a high level. 
-
-The hardware consists of one PCB that allows to build modules as small as 8HP while the firmware consists of a collection of classes compatible with Teensy's audio library.
-
-<img src="./hardware/motherboard-1.WEBP" width="200px"/> <img src="./hardware/motherboard-2.WEBP" width="200px"/>
+The Motherboard is a Eurorack platform that provides an easy way to build modules abstracting low level details away from the developer.  
 
 ## Features
 
-* 16 analog inputs (12 bits, 5v, 44.1kHz)
-* 16 outputs (8bits Binary Code Modulation)
-* 2 audio channels over I2S or 8 channels over TDM
-* I2C to expand with analog outputs and more
-* MIDI in and out
-* Configurable via JSON over MIDI SysEx
+* 15 analog inputs
+* 16 digital outputs
+* 2 audio outputs
+* Addressable LEDs
+* MIDI TRS type A in and out
 * 10 pin Eurorack either way power
-* Through hole and SMD for most footprints
-* Teensy 4.0
+* Uses a Pico 2 (RP2350)
 
 ## The idea
 
@@ -37,25 +29,12 @@ See the hardware's and firmware's instructions under their respective folder.
 
 ## Known issues
 
-- Actual inputs sampling frequency is reduced due to audible artifacts.
 
-
-## TODO list
-
-- Web editor to edit settings and maybe visualize data
-- Use the CMSIS-DSP library to perform interpolation and filtering on the ADC readings?
-- Auto calibration, does that require a digital potentiometer such as the MCP4651?
-- Adding microSD card socket to store settings, MUC2 to move to pin 8?
-- Adding an inverter chip to produce -5v out of the +5v to keep the board reliant only on +5v power but add capability of processing negative signals.
-- Can Tx detect If MIDI or CLK type of signals
-- How to Teletype I2C compatibility
-- TDM input and output to send/receive 16 signals over one jack
-- Explore replacement of Teensy for direct integration to the board by STM32F7, Pi Pico, Linux chip, FPGA chip,...
-
+## TODO
 
 # About me
 
-You can buy PCBs on my website:
+You can buy assembled modules on my website:
 
 https://www.ghostintranslation.com/
 
@@ -72,10 +51,6 @@ To support my work:
 https://ko-fi.com/ghostintranslation
 
 https://www.buymeacoffee.com/ghostintranslation
-
-https://liberapay.com/ghostintranslation
-
-https://github.com/sponsors/ghostintranslation
 
 # License
 
